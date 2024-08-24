@@ -25,10 +25,12 @@ PC                  ")"
 
 /* Operadores */
 OP_ASIG             ":""="
-OP_SUM              "+"
-OP_MUL              "*"
-OP_RES              "-"
-OP_DIV              "/"
+
+
+/* Operadores logicos*/
+OP_AND              "AND"
+OP_OR               "OR"
+OP_NOT              "NOT"
 
 /* Palabras reservadas */
 MIENTRAS            "mientras"
@@ -37,9 +39,9 @@ SI                  "si"
 SINO                "sino"
 ESCRIBIR            "escribir"
 LEER                "leer"
-T_FLOAT             "Float"
-T_INT               "Int"
-T_STRING            "String"
+V_FLOAT             "Float"
+V_INT               "Int"
+V_STRING            "String"
 GET_PENULTIMA_OP    "getPenultimatePosition"
 SUMAR_ULTIMOS       "sumaLosUltimos"
 
@@ -50,21 +52,23 @@ SUMAR_ULTIMOS       "sumaLosUltimos"
 {SINO}              {return SINO;}
 {ESCRIBIR}          {return ESCRIBIR;}
 {LEER}              {return LEER;}
-{T_FLOAT}           {return T_FLOAT;}
-{T_INT}             {return T_INT;}
-{T_STRING}          {return T_STRING;}
+{V_FLOAT}           {return V_FLOAT;}
+{V_INT}             {return V_INT;}
+{V_STRING}          {return V_STRING;}
 {GET_PENULTIMA_OP}  {return GET_PENULTIMA_OP;}
 {SUMAR_ULTIMOS}     {return SUMAR_ULTIMOS;}
 
-{CTE}			{printf("\nConstante: %s\n", yytext);return CTE;}
-{ID}			{printf("\nIdentificador: %s\n", yytext);return ID;}
-{OP_SUM}		{printf("\nSuma: %s\n", yytext);return OP_SUM;}
-{OP_ASIG}		{printf("\nAsignacion: %s\n", yytext);return OP_ASIG;}
-{OP_MUL}		{printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
-{OP_RES}		{printf("\nResta: %s\n", yytext);return OP_RES;}
-{OP_DIV}		{printf("\nDivision: %s\n", yytext);return OP_DIV;}
-{PA}			{printf("\nParAbre: %s\n", yytext);return PA;}
-{PC}			{printf("\nParCierra: %s\n", yytext);return PC;}
+{OP_AND}            {return OP_AND;}
+{OP_OR}             {return OP_OR;}
+{OP_NOT}            {return OP_NOT;}
+
+{OP_ASIG}           {return OP_ASIG;}
+{PA}                {return PA;}
+{PC}                {return PC;}
+
+{CTE}               {return CTE;}
+{ID}                {return ID;}
+
 "\n"      		
 "\t"
 "\n\t"

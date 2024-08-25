@@ -18,12 +18,18 @@ int yyerror(void);
 DIGITO              [0-9]
 DIGITOSINCERO       [1-9]
 LETRA               [a-zA-Z]
+VALOR_COMENTARIO    "[^\-\%\&\|\;\@\#\^\~\$]*"
 PARA                "("
 PARC                ")"
 COMA                ","
 LLAA                "{"
 LLAC                "}"
 PUNTO               "."
+PYC                 ";"
+CORA                "["
+CORC                "]"
+COM_ABRE            "*-"         
+COM_CIERRA          "-*"
 
 CTE_INT             (-?{DIGITOSINCERO}{DIGITO}*)|0
 CTE_FLT             -?(({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
@@ -69,6 +75,7 @@ SUMAR_ULTIMOS       "sumaLosUltimos"
 {V_FLOAT}           {return V_FLOAT;}
 {V_INT}             {return V_INT;}
 {V_STRING}          {return V_STRING;}
+{VALOR_COMENTARIO}  {return VALOR_COMENTARIO;}
 {BINARY_COUNT}      {return BINARY_COUNT;}
 {SUMAR_ULTIMOS}     {return SUMAR_ULTIMOS;}
 
@@ -79,7 +86,12 @@ SUMAR_ULTIMOS       "sumaLosUltimos"
 {OP_ASIG}           {return OP_ASIG;}
 {PARA}              {return PARA;}
 {PARC}              {return PARC;}
+{CORA}              {return CORA;}
+{CORC}              {return CORC;}
+{COM_ABRE}          {return COM_ABRE;}
+{COM_CIERRA}        {return COM_CIERRA;}
 {COMA}              {return COMA;}
+{PYC}               {return PYC;}
 {MAY}               {return MAY;}
 {MEN}               {return MEN;}
 {MAYI}              {return MAYI;}

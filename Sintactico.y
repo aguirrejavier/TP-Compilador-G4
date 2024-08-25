@@ -44,13 +44,19 @@ FILE  *yyin;
 %token CTE_FLT
 %token CTE_STR
 %token ID
+%token CORA
+%token CORC
+%token COM_ABRE
+%token COM_CIERRA
+%token PYC
+%token VALOR_COMENTARIO
 
 %%
 sentencia:  	   
 	asignacion {printf(" FIN\n");} ;
 
 asignacion: 
-	ID OP_AS expresion
+	ID OP_ASIG expresion
 	  ;
 	  
 expresion:
@@ -123,10 +129,15 @@ identificadores:
     identificador
     |identificadores COMA identificador
 	;
-
+	
+identificador:
+	;
 if:
     sin_sino
-	|sin_sino SINO cuerpo ENDIF
+	|sin_sino SINO cuerpo ENDIF 
+	;
+
+cuerpo:
 	;
 
 sin_sino:
@@ -150,6 +161,34 @@ while:
 comentario: 
 	COM_ABRE VALOR_COMENTARIO COM_CIERRA
 	;
+
+binary_count:
+	ID OP_ASIG BINARY_COUNT PARA lista PARC
+	;
+
+lista: 
+	CORA elementos CORC 
+	;
+
+elementos: 
+	CTE_INT COMA elementos | ID COMA elementos | ID | CTE_INT	
+	;
+
+sumaLosUltimos: 
+	ID OP_ASIG SUMAR_ULTIMOS PARA CTE_INT PYC lista_nros PARC
+	;
+
+lista_nros: 
+	CORA elementos_nros CORC
+	;
+
+elementos_nros: 
+	cte_admitida COMA elementos_nros | cte_admitida
+	;
+
+cte_admitida: 
+	CTE_INT | CTE_FLT
+	;	
 %%
 
 

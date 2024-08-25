@@ -15,58 +15,82 @@ int yyerror(void);
 %option noyywrap  
 %option yylineno 
 
-DIGITO			[0-9]
-LETRA			[a-zA-Z]
+DIGITO              [0-9]
+DIGITOSINCERO       [1-9]
+LETRA               [a-zA-Z]
+PARA                "("
+PARC                ")"
+COMA                ","
+LLAA                "{"
+LLAC                "}"
+PUNTO               "."
 
-CTE                 {DIGITO}+
+CTE_INT             (-?{DIGITOSINCERO}{DIGITO}*)|0
+CTE_FLT             -?(({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
+CTE_STR             \"[^"]*\"
 ID                  {LETRA}({LETRA}|{DIGITO})*
-PA                  "("
-PC                  ")"
 
 /* Operadores */
 OP_ASIG             ":""="
+MAY                 ">"
+MEN                 "<"
+MAYI                ">="
+MENI                "<="
+DIST                "<>"
 
-
-/* Operadores logicos*/
-OP_AND              "AND"
-OP_OR               "OR"
-OP_NOT              "NOT"
+AND                 "AND"
+OR                  "OR"
+NOT                 "NOT"
 
 /* Palabras reservadas */
-MIENTRAS            "mientras"
 INIT                "init"
-SI                  "si"
-SINO                "sino"
+MIENTRAS            "while"
+SI                  "if"
+SINO                "else"
+ENDIF               "endif"
+ENDWHILE            "endwhile"
 ESCRIBIR            "escribir"
 LEER                "leer"
 V_FLOAT             "Float"
 V_INT               "Int"
 V_STRING            "String"
-GET_PENULTIMA_OP    "getPenultimatePosition"
+BINARY_COUNT        "binaryCount"
 SUMAR_ULTIMOS       "sumaLosUltimos"
 
 %%
-{MIENTRAS}          {return MIENTRAS;}
 {INIT}              {return INIT;}
+{MIENTRAS}          {return MIENTRAS;}
 {SI}                {return SI;}
 {SINO}              {return SINO;}
+{ENDIF}             {return ENDIF;}
+{ENDWHILE}          {return ENDWHILE;}
 {ESCRIBIR}          {return ESCRIBIR;}
 {LEER}              {return LEER;}
 {V_FLOAT}           {return V_FLOAT;}
 {V_INT}             {return V_INT;}
 {V_STRING}          {return V_STRING;}
-{GET_PENULTIMA_OP}  {return GET_PENULTIMA_OP;}
+{BINARY_COUNT}      {return BINARY_COUNT;}
 {SUMAR_ULTIMOS}     {return SUMAR_ULTIMOS;}
 
-{OP_AND}            {return OP_AND;}
-{OP_OR}             {return OP_OR;}
-{OP_NOT}            {return OP_NOT;}
+{AND}               {return AND;}
+{OR}                {return OR;}
+{NOT}               {return NOT;}
 
 {OP_ASIG}           {return OP_ASIG;}
-{PA}                {return PA;}
-{PC}                {return PC;}
+{PARA}              {return PARA;}
+{PARC}              {return PARC;}
+{COMA}              {return COMA;}
+{MAY}               {return MAY;}
+{MEN}               {return MEN;}
+{MAYI}              {return MAYI;}
+{MENI}              {return MENI;}
+{DIST}              {return DIST;}
+{LLAA}              {return LLAA;}
+{LLAC}              {return LLAC;}
 
-{CTE}               {return CTE;}
+{CTE_INT}           {return CTE_INT;}
+{CTE_FLT}           {return CTE_FLT;}
+{CTE_STR}           {return CTE_STR;}
 {ID}                {return ID;}
 
 "\n"      		
@@ -74,6 +98,6 @@ SUMAR_ULTIMOS       "sumaLosUltimos"
 "\n\t"
 " "             		
 "\r\n"
-.			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
+.                   { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
 

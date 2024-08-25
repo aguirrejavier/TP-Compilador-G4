@@ -52,31 +52,25 @@ FILE  *yyin;
 %token VALOR_COMENTARIO
 
 %%
-sentencia:  	   
-	asignacion {printf(" FIN\n");} ;
-
-asignacion: 
-	ID OP_ASIG expresion
-	  ;
+programa:  	   
+	cuerpo {printf(" FIN\n");} ;
+	;
+cuerpo:
+	sentencia
+	| cuerpo sentencia
+	;
 	  
-expresion:
-	termino
-	|expresion OP_SUM termino
-	|expresion OP_RES termino
+sentencia:
+	declaracion	
+	| leer
+	| escribir
+	| if
+	| while
+	| asignacion
+	| binary_count
+	| sumaLosUltimos
 	 ;
 
-termino:
-       factor {printf("    Factor es Termino\n");}
-       |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
-       |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
-       ;
-
-factor: 
-      ID {printf("    ID es Factor \n");}
-      | CTE {printf("    CTE es Factor\n");}
-	| PARA expresion PARC {printf("    Expresion entre parentesis es Factor\n");}
-     	;
-		
 leer: 
 	LEER PARA ID PARC
 	|LEER PARA tipo_de_dato PARC
@@ -109,7 +103,7 @@ comparacion:
 operando:
 	ID
 	|expresion
-	|CTE
+	|tipo_de_dato
 	;
 
 declaracion:	
@@ -131,13 +125,13 @@ identificadores:
 	;
 	
 identificador:
+	V_INT
+	| V_FLOAT
+	| V_STRING
 	;
 if:
     sin_sino
 	|sin_sino SINO cuerpo ENDIF 
-	;
-
-cuerpo:
 	;
 
 sin_sino:

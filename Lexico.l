@@ -43,7 +43,10 @@ MEN                 "<"
 MAYI                ">="
 MENI                "<="
 DIST                "<>"
-
+OP_SUM              "+"
+OP_REST             "-"
+OP_DIV              "/"
+OP_MUL              "*"
 AND                 "AND"
 OR                  "OR"
 NOT                 "NOT"
@@ -84,6 +87,10 @@ SUMAR_ULTIMOS       "sumaLosUltimos"
 {NOT}               {return NOT;}
 
 {OP_ASIG}           {return OP_ASIG;}
+{OP_SUM}            {return OP_SUM;}
+{OP_REST}           {return OP_REST;}
+{OP_DIV}            {return OP_DIV;}
+{OP_MUL}            {return OP_MUL;}
 {PARA}              {return PARA;}
 {PARC}              {return PARC;}
 {CORA}              {return CORA;}

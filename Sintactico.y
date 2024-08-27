@@ -129,13 +129,14 @@ identificador:
 	| V_FLOAT
 	| V_STRING
 	;
+
 if:
     sin_sino
-	|sin_sino SINO cuerpo ENDIF 
+	|sin_sino SINO LLAA cuerpo LLAC 
 	;
 
 sin_sino:
-	SI PARA condiciones PARC cuerpo ENDIF
+	SI PARA condiciones PARC LLAA cuerpo LLAC
 	;
 
 asignacion: 
@@ -149,7 +150,7 @@ tipo_de_dato:
 	;
 	 
 while:
-	MIENTRAS PARA condiciones PARC cuerpo ENDWHILE
+	MIENTRAS PARA condiciones PARC LLAA cuerpo LLAC
 	;
 	
 comentario: 

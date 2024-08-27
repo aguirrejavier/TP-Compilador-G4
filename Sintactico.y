@@ -33,11 +33,9 @@ FILE  *yyin;
 %token ID
 
 /* Operadores */
-%token OP_ASIG
-%token OP_SUM
-%token OP_REST
-%token OP_DIV
-%token OP_MUL
+%right OP_ASIG
+%left OP_REST OP_SUM
+%left OP_DIV OP_MUL
 %token MAY
 %token MEN
 %token MAYI
@@ -117,13 +115,14 @@ expresion:
 	;
 
 termino:
-    factor {printf("    Factor es Termino\n");}
+	factor {printf("    Factor es Termino\n");}
     |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
     |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
     ;
 
 factor: 
-    ID {printf("    ID es Factor \n");}
+	OP_REST factor  
+    |ID {printf("    ID es Factor \n");}
     | CTE_INT {printf("    CTE es Factor\n");}
 	| CTE_FLT 
 	| CTE_STR
@@ -177,7 +176,7 @@ while:
 	;
 
 asignacion: 
-	ID OP_ASIG expresion {printf("Estoy haciendo una asignacion");}
+	ID OP_ASIG expresion 
 	;
 
 tipo_de_dato:

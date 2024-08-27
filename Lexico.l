@@ -29,8 +29,8 @@ CORA                "["
 CORC                "]"
 DOS_PUNTOS          ":"
 
-CTE_INT             ({DIGITOSINCERO}{DIGITO}*)|0
-CTE_FLT             -?(({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
+CTE_INT            ({DIGITOSINCERO}{DIGITO}*)|0
+CTE_FLT             (({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
 CTE_STR             \"[^"]*\" 
 ID                  {LETRA}({LETRA}|{DIGITO})*
 

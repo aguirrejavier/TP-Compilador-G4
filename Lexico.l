@@ -18,7 +18,6 @@ int yyerror(void);
 DIGITO              [0-9]
 DIGITOSINCERO       [1-9]
 LETRA               [a-zA-Z]
-VALOR_COMENTARIO    "[^\-\%\&\|\;\@\#\^\~\$]*"
 PARA                "("
 PARC                ")"
 COMA                ","
@@ -28,10 +27,9 @@ PUNTO               "."
 PYC                 ";"
 CORA                "["
 CORC                "]"
-COM_ABRE            "*-"         
-COM_CIERRA          "-*"
+DOS_PUNTOS          ":"
 
-CTE_INT             (-?{DIGITOSINCERO}{DIGITO}*)|0
+CTE_INT             ({DIGITOSINCERO}{DIGITO}*)|0
 CTE_FLT             -?(({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
 CTE_STR             \"[^"]*\"
 ID                  {LETRA}({LETRA}|{DIGITO})*
@@ -56,8 +54,6 @@ INIT                "init"
 MIENTRAS            "while"
 SI                  "if"
 SINO                "else"
-ENDIF               "endif"
-ENDWHILE            "endwhile"
 ESCRIBIR            "escribir"
 LEER                "leer"
 V_FLOAT             "Float"
@@ -66,37 +62,40 @@ V_STRING            "String"
 BINARY_COUNT        "binaryCount"
 SUMAR_ULTIMOS       "sumaLosUltimos"
 
+VALOR_COMENTARIO    "[^\-\%\&\|\;\@\#\^\~\$]*"
+
 %%
 {INIT}              {return INIT;}
 {MIENTRAS}          {return MIENTRAS;}
 {SI}                {return SI;}
 {SINO}              {return SINO;}
-{ENDIF}             {return ENDIF;}
-{ENDWHILE}          {return ENDWHILE;}
 {ESCRIBIR}          {return ESCRIBIR;}
 {LEER}              {return LEER;}
 {V_FLOAT}           {return V_FLOAT;}
 {V_INT}             {return V_INT;}
 {V_STRING}          {return V_STRING;}
-{VALOR_COMENTARIO}  {return VALOR_COMENTARIO;}
 {BINARY_COUNT}      {return BINARY_COUNT;}
 {SUMAR_ULTIMOS}     {return SUMAR_ULTIMOS;}
 
 {AND}               {return AND;}
 {OR}                {return OR;}
 {NOT}               {return NOT;}
-
-{OP_ASIG}           {return OP_ASIG;}
 {OP_SUM}            {return OP_SUM;}
-{OP_REST}           {return OP_REST;}
+{OP_REST}           {printf("\nresta: %s\n",yytext);return OP_REST;}
 {OP_DIV}            {return OP_DIV;}
 {OP_MUL}            {return OP_MUL;}
+
+{CTE_INT}           {printf("\nConstante entera: %s\n",yytext);return CTE_INT;}
+{CTE_FLT}           {return CTE_FLT;}
+{CTE_STR}           {return CTE_STR;}
+{ID}                {return ID;}
+
+{OP_ASIG}           {return OP_ASIG;}
+
 {PARA}              {return PARA;}
 {PARC}              {return PARC;}
 {CORA}              {return CORA;}
 {CORC}              {return CORC;}
-{COM_ABRE}          {return COM_ABRE;}
-{COM_CIERRA}        {return COM_CIERRA;}
 {COMA}              {return COMA;}
 {PYC}               {return PYC;}
 {MAY}               {return MAY;}
@@ -106,11 +105,8 @@ SUMAR_ULTIMOS       "sumaLosUltimos"
 {DIST}              {return DIST;}
 {LLAA}              {return LLAA;}
 {LLAC}              {return LLAC;}
-
-{CTE_INT}           {return CTE_INT;}
-{CTE_FLT}           {return CTE_FLT;}
-{CTE_STR}           {return CTE_STR;}
-{ID}                {return ID;}
+{DOS_PUNTOS}        {return DOS_PUNTOS;}
+{VALOR_COMENTARIO}
 
 "\n"      		
 "\t"

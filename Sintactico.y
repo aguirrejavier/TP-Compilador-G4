@@ -17,8 +17,6 @@ FILE  *yyin;
 %token MIENTRAS
 %token SI
 %token SINO
-%token ENDIF
-%token ENDWHILE
 %token ESCRIBIR
 %token LEER
 %token V_FLOAT
@@ -30,6 +28,10 @@ FILE  *yyin;
 %token OR
 %token NOT
 %token OP_ASIG
+%token OP_SUM
+%token OP_REST
+%token OP_MUL
+%token OP_DIV
 %token PARA
 %token PARC
 %token COMA
@@ -46,10 +48,8 @@ FILE  *yyin;
 %token ID
 %token CORA
 %token CORC
-%token COM_ABRE
-%token COM_CIERRA
 %token PYC
-%token VALOR_COMENTARIO
+%token DOS_PUNTOS
 
 %%
 programa:  	   
@@ -70,6 +70,48 @@ sentencia:
 	| binary_count
 	| sumaLosUltimos
 	 ;
+declaracion:	
+	INIT LLAA lineas LLAC
+	;
+	
+lineas: 
+    lineas linea
+    |linea
+	;
+
+linea:
+     identificadores DOS_PUNTOS tipo_de_dato
+	;
+
+identificadores:
+    identificador
+    |identificadores COMA identificador
+	;
+	
+identificador:
+	V_INT
+	| V_FLOAT
+	| V_STRING
+	;
+
+expresion:
+	termino
+	|expresion OP_SUM termino
+	|expresion OP_REST termino
+	;
+
+termino:
+    factor {printf("    Factor es Termino\n");}
+    |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
+    |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
+    ;
+
+factor: 
+    ID {printf("    ID es Factor \n");}
+    | CTE_INT {printf("    CTE es Factor\n");}
+	| CTE_FLT 
+	| PARA expresion PARC {printf("    Expresion entre parentesis es Factor\n");}
+    ;
 
 leer: 
 	LEER PARA ID PARC
@@ -79,7 +121,6 @@ leer:
 escribir:
 	ESCRIBIR PARA tipo_de_dato PARC
 	;
-
 condiciones:
 	condicion OR condicion
 	|condicion AND condicion
@@ -99,37 +140,9 @@ comparacion:
 	|ID		MENI	operando
 	|ID		DIST	operando
 	;
-	
 operando:
-	ID
-	|expresion
-	|tipo_de_dato
+	expresion
 	;
-
-declaracion:	
-	INIT LLAA lineas LLAC
-	;
-	
-lineas: 
-    lineas linea
-    |linea
-	;
-
-linea:
-     identificadores : tipo_de_dato
-	;
-
-identificadores:
-    identificador
-    |identificadores COMA identificador
-	;
-	
-identificador:
-	V_INT
-	| V_FLOAT
-	| V_STRING
-	;
-
 if:
     sin_sino
 	|sin_sino SINO LLAA cuerpo LLAC 
@@ -139,22 +152,18 @@ sin_sino:
 	SI PARA condiciones PARC LLAA cuerpo LLAC
 	;
 
+while:
+	MIENTRAS PARA condiciones PARC LLAA cuerpo LLAC
+	;
+
 asignacion: 
-     ID OP_ASIG tipo_de_dato
+	ID OP_ASIG expresion
 	 ;
 
 tipo_de_dato:
 	CTE_INT
 	|CTE_FLT
 	|CTE_STR
-	;
-	 
-while:
-	MIENTRAS PARA condiciones PARC LLAA cuerpo LLAC
-	;
-	
-comentario: 
-	COM_ABRE VALOR_COMENTARIO COM_CIERRA
 	;
 
 binary_count:
@@ -192,20 +201,17 @@ int main(int argc, char *argv[])
     if((yyin = fopen(argv[1], "rt"))==NULL)
     {
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
-       
     }
     else
     { 
-        
-        yyparse();
-        
+    	yyparse();
     }
 	fclose(yyin);
-        return 0;
+    return 0;
 }
 int yyerror(void)
-     {
-       printf("Error Sintactico\n");
-	 exit (1);
-     }
+{
+    printf("Error Sintactico\n");
+	exit (1);
+}
 

@@ -13,6 +13,41 @@ FILE  *yyin;
 
 %}
 
+%token DIGITO
+%token DIGITOSINCERO
+%token LETRA
+%token PARA
+%token PARC
+%token COMA
+%token LLAA
+%token LLAC
+%token PUNTO
+%token PYC
+%token CORA
+%token CORC
+%token DOS_PUNTOS
+
+%token CTE_INT
+%token CTE_FLT
+%token CTE_STR
+%token ID
+
+/* Operadores */
+%token OP_ASIG
+%token OP_SUM
+%token OP_REST
+%token OP_DIV
+%token OP_MUL
+%token MAY
+%token MEN
+%token MAYI
+%token MENI
+%token DIST
+%token AND
+%token OR
+%token NOT
+
+/* Palabras reservadas */
 %token INIT
 %token MIENTRAS
 %token SI
@@ -20,40 +55,16 @@ FILE  *yyin;
 %token ESCRIBIR
 %token LEER
 %token V_FLOAT
-%token V_INT
-%token V_STRING
+%token V_INT  
+%token V_STRING  
 %token BINARY_COUNT
 %token SUMAR_ULTIMOS
-%token AND
-%token OR
-%token NOT
-%token OP_ASIG
-%token OP_SUM
-%token OP_REST
-%token OP_MUL
-%token OP_DIV
-%token PARA
-%token PARC
-%token COMA
-%token MAY
-%token MEN
-%token MAYI
-%token MENI
-%token DIST
-%token LLAA
-%token LLAC
-%token CTE_INT
-%token CTE_FLT
-%token CTE_STR
-%token ID
-%token CORA
-%token CORC
-%token PYC
-%token DOS_PUNTOS
+%token VALOR_COMENTARIO
 
 %%
 programa:  	   
-	cuerpo {printf(" FIN\n");} ;
+	cuerpo {printf(" FIN\n");}
+	|declaracion cuerpo
 	;
 cuerpo:
 	sentencia
@@ -69,7 +80,12 @@ sentencia:
 	| asignacion
 	| binary_count
 	| sumaLosUltimos
+	| vacio
 	 ;
+
+vacio:
+	;
+
 declaracion:	
 	INIT LLAA lineas LLAC
 	;
@@ -110,21 +126,22 @@ factor:
     ID {printf("    ID es Factor \n");}
     | CTE_INT {printf("    CTE es Factor\n");}
 	| CTE_FLT 
+	| CTE_STR
 	| PARA expresion PARC {printf("    Expresion entre parentesis es Factor\n");}
     ;
 
 leer: 
-	LEER PARA ID PARC
-	|LEER PARA tipo_de_dato PARC
+	LEER PARA ID PARC {printf("Estoy leyendo una ID");}
+	|LEER PARA tipo_de_dato PARC {printf("Estoy leyendo un tipo_de_Dato");}
 	;
 	
 escribir:
-	ESCRIBIR PARA tipo_de_dato PARC
+	ESCRIBIR PARA tipo_de_dato PARC {printf("Estoy escribiendo");}
 	;
 condiciones:
-	condicion OR condicion
+	condicion  
+	|condicion OR condicion
 	|condicion AND condicion
-	|condicion
 	;
 
 condicion:
@@ -134,15 +151,18 @@ condicion:
 	;
 
 comparacion:
-	ID 		MAY 	operando
-	|ID 	MEN 	operando
-	|ID 	MAYI 	operando
-	|ID		MENI	operando
-	|ID		DIST	operando
+	operando 		MAY 	operando
+	|operando 		MEN 	operando
+	|operando 		MAYI 	operando
+	|operando		MENI	operando
+	|operando		DIST	operando
 	;
+
 operando:
 	expresion
+	|ID
 	;
+
 if:
     sin_sino
 	|sin_sino SINO LLAA cuerpo LLAC 
@@ -153,12 +173,12 @@ sin_sino:
 	;
 
 while:
-	MIENTRAS PARA condiciones PARC LLAA cuerpo LLAC
+	MIENTRAS PARA condiciones PARC LLAA cuerpo LLAC 
 	;
 
 asignacion: 
-	ID OP_ASIG expresion
-	 ;
+	ID OP_ASIG expresion {printf("Estoy haciendo una asignacion");}
+	;
 
 tipo_de_dato:
 	CTE_INT

@@ -31,20 +31,20 @@ DOS_PUNTOS          ":"
 
 CTE_INT             ({DIGITOSINCERO}{DIGITO}*)|0
 CTE_FLT             -?(({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
-CTE_STR             \"[^"]*\"
+CTE_STR             \"[^"]*\" 
 ID                  {LETRA}({LETRA}|{DIGITO})*
 
 /* Operadores */
 OP_ASIG             ":""="
+OP_SUM              "+"
+OP_REST             "-"
+OP_DIV              "/"
+OP_MUL              "*"
 MAY                 ">"
 MEN                 "<"
 MAYI                ">="
 MENI                "<="
 DIST                "<>"
-OP_SUM              "+"
-OP_REST             "-"
-OP_DIV              "/"
-OP_MUL              "*"
 AND                 "AND"
 OR                  "OR"
 NOT                 "NOT"
@@ -61,8 +61,8 @@ V_INT               "Int"
 V_STRING            "String"
 BINARY_COUNT        "binaryCount"
 SUMAR_ULTIMOS       "sumaLosUltimos"
+VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
 
-VALOR_COMENTARIO    "[^\-\%\&\|\;\@\#\^\~\$]*"
 
 %%
 {INIT}              {return INIT;}
@@ -86,9 +86,9 @@ VALOR_COMENTARIO    "[^\-\%\&\|\;\@\#\^\~\$]*"
 {OP_MUL}            {return OP_MUL;}
 
 {CTE_INT}           {printf("\nConstante entera: %s\n",yytext);return CTE_INT;}
-{CTE_FLT}           {return CTE_FLT;}
-{CTE_STR}           {return CTE_STR;}
-{ID}                {return ID;}
+{CTE_FLT}           {printf("\nConstante float: %s\n",yytext);return CTE_FLT;}
+{CTE_STR}           {printf("\nConstante string: %s\n",yytext);return CTE_STR;}
+{ID}                {printf("\nIdentificador: %s\n",yytext);return ID;}
 
 {OP_ASIG}           {return OP_ASIG;}
 
@@ -106,7 +106,7 @@ VALOR_COMENTARIO    "[^\-\%\&\|\;\@\#\^\~\$]*"
 {LLAA}              {return LLAA;}
 {LLAC}              {return LLAC;}
 {DOS_PUNTOS}        {return DOS_PUNTOS;}
-{VALOR_COMENTARIO}
+{VALOR_COMENTARIO}  {return VALOR_COMENTARIO;}
 
 "\n"      		
 "\t"

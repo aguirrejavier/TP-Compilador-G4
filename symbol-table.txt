@@ -1,0 +1,3 @@
+NOMBRE                                   || TIPODATO   || VALOR                                              || LONGITUD  
+_d                                       ||            ||                                                    ||           
+_e                                       ||            ||                                                    ||           

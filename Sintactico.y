@@ -3,13 +3,27 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "y.tab.h"
+#include "Lista.h"
+
+#define SYMBOL_TABLE "symbol-table.txt"
+
 int yystopparser=0;
 FILE  *yyin;
+char *yytext;
 
-  int yyerror();
-  int yylex();
+Lista tablaSimbolos;
+typedef enum {
+    LEXEMA_ID,
+    LEXEMA_NUM,
+    LEXEMA_STR
+} TipoLexema;
 
+int yyerror();
+int yylex();
+void guardarEnArchivo();
+void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 
 %}
 
@@ -122,7 +136,7 @@ termino:
 
 factor: 
 	OP_REST factor  
-    |ID {printf("    ID es Factor \n");}
+    |ID {agregarLexema(yytext, LEXEMA_ID);printf("    ID es Factor \n");}
     | CTE_INT {printf("    CTE es Factor\n");}
 	| CTE_FLT 
 	| CTE_STR
@@ -214,17 +228,78 @@ cte_admitida:
 	;	
 %%
 
+void guardarEnArchivo(){
+
+    FILE *file = fopen(SYMBOL_TABLE, "w+");
+    t_lexema lexemaRecuperado;
+
+   	if (file == NULL) {
+        perror("Error al abrir el archivo");
+        exit(1);
+    }
+
+    fprintf(file,"%-40s || %-10s || %-50s || %-10s\n","NOMBRE","TIPODATO","VALOR","LONGITUD");
+    while( !listaVacia(&tablaSimbolos) )
+    {
+        sacarLexemaLista(&tablaSimbolos, &lexemaRecuperado);
+        fprintf(file, "%-40s || %-10s || %-50s || %-10s\n", lexemaRecuperado.nombre, lexemaRecuperado.tipoDato, lexemaRecuperado.valor, lexemaRecuperado.longitud );
+    }
+    fclose(file);
+}
+void agregarLexema(const char *simboloNombre, TipoLexema tipo) {
+    t_lexema lex;
+    char nombre[100] = "_";
+    char valor[100];
+    char strLongitud[10] = "";
+    int longitud;
+
+    switch (tipo) {
+        case LEXEMA_ID:
+            strcat(nombre, simboloNombre);
+            break;
+
+        case LEXEMA_NUM:
+            strcat(nombre, simboloNombre);
+            strcpy(valor, simboloNombre);
+            break;
+
+        case LEXEMA_STR: {
+            int i = 0, j = 0, ocurrencias = 0;
+            while (ocurrencias < 2 && simboloNombre[i] != '\0') {
+                if (simboloNombre[i] != '"') {
+                    valor[j++] = simboloNombre[i];
+                } else {
+                    ocurrencias++;
+                }
+                i++;
+            }
+            valor[j] = '\0';
+            strcat(nombre, valor);
+            longitud = strlen(valor);
+            sprintf(strLongitud, "%d", longitud);
+            break;
+        }
+    }
+	strcpy(lex.nombre, simboloNombre);
+    if (!buscarLexemaEnLista(&tablaSimbolos, lex)) {
+        strcpy(lex.nombre, nombre);
+        strcpy(lex.valor, tipo == LEXEMA_ID ? "" : valor);
+        strcpy(lex.longitud, tipo == LEXEMA_STR ? strLongitud : "");
+        insertarLexemaEnLista(&tablaSimbolos, lex);
+    }
+}
 
 int main(int argc, char *argv[])
 {
-    if((yyin = fopen(argv[1], "rt"))==NULL)
-    {
+	crearListaLexemas(&tablaSimbolos);
+    if((yyin = fopen(argv[1], "rt"))==NULL){
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
     }
-    else
-    { 
+    else{ 
     	yyparse();
     }
+
+	guardarEnArchivo();
 	fclose(yyin);
     return 0;
 }

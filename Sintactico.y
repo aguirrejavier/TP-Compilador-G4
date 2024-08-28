@@ -123,9 +123,9 @@ identificador:
 	;
 
 expresion:
-	termino
-	|expresion OP_SUM termino
+	expresion OP_SUM termino
 	|expresion OP_REST termino
+	|termino
 	;
 
 termino:
@@ -164,16 +164,11 @@ condicion:
 	;
 
 comparacion:
-	operando 		MAY 	operando
-	|operando 		MEN 	operando
-	|operando 		MAYI 	operando
-	|operando		MENI	operando
-	|operando		DIST	operando
-	;
-
-operando:
-	expresion
-	|ID
+	expresion 		MAY 	expresion
+	|expresion 		MEN 	expresion
+	|expresion 		MAYI 	expresion
+	|expresion		MENI	expresion
+	|expresion		DIST	expresion
 	;
 
 if:
@@ -298,7 +293,6 @@ int main(int argc, char *argv[])
     else{ 
     	yyparse();
     }
-
 	guardarEnArchivo();
 	fclose(yyin);
     return 0;

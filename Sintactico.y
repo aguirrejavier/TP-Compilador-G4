@@ -48,8 +48,9 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 
 /* Operadores */
 %right OP_ASIG
-%left OP_REST OP_SUM
-%left OP_DIV OP_MUL
+%right MENOS_UNARIO
+%token OP_REST OP_SUM
+%token OP_DIV OP_MUL
 %token MAY
 %token MEN
 %token MAYI
@@ -76,7 +77,7 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 %%
 programa:  	   
 	cuerpo {printf(" FIN\n");}
-	|declaracion cuerpo
+	|declaracion cuerpo {printf(" FIN2\n");}
 	;
 cuerpo:
 	sentencia
@@ -84,8 +85,7 @@ cuerpo:
 	;
 	  
 sentencia:
-	declaracion	
-	| leer
+	leer
 	| escribir
 	| if
 	| while
@@ -108,15 +108,15 @@ lineas:
 	;
 
 linea:
-     identificadores DOS_PUNTOS tipo_de_dato
+     identificadores DOS_PUNTOS tipodeDato
 	;
 
 identificadores:
-    identificador
-    |identificadores COMA identificador
+    ID {agregarLexema(yytext,LEXEMA_ID);}
+    |identificadores COMA ID {agregarLexema(yytext,LEXEMA_ID);}
 	;
 	
-identificador:
+tipodeDato:
 	V_INT
 	| V_FLOAT
 	| V_STRING
@@ -134,12 +134,13 @@ termino:
     |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
     ;
 
-factor: 
-	OP_REST factor  
-    |ID {agregarLexema(yytext, LEXEMA_ID);printf("    ID es Factor \n");}
-    | CTE_INT {printf("    CTE es Factor\n");}
-	| CTE_FLT 
-	| CTE_STR
+factor:
+	OP_REST CTE_FLT 
+	|OP_REST CTE_INT {agregarLexema(strcat("-",yytext),LEXEMA_NUM);}
+    |ID {printf("    ID es Factor \n");}
+    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM); printf("    CTE es Factor\n");}
+	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);}
+	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);}
 	| PARA expresion PARC {printf("    Expresion entre parentesis es Factor\n");}
     ;
 
@@ -275,11 +276,12 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo) {
             break;
         }
     }
-	strcpy(lex.nombre, simboloNombre);
-    if (!buscarLexemaEnLista(&tablaSimbolos, lex)) {
+	strcpy(lex.nombre, nombre);
+    if (buscarLexemaEnLista(&tablaSimbolos, lex) == 0) {
         strcpy(lex.nombre, nombre);
         strcpy(lex.valor, tipo == LEXEMA_ID ? "" : valor);
         strcpy(lex.longitud, tipo == LEXEMA_STR ? strLongitud : "");
+		strcpy(lex.tipoDato, ""); 
         insertarLexemaEnLista(&tablaSimbolos, lex);
     }
 }

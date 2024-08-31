@@ -33,8 +33,7 @@ int insertarLexemaEnLista(Lista *lista, t_lexema nuevoDato){
 int buscarLexemaEnLista(Lista *lista, t_lexema datoBuscado){
     t_nodo *actual = lista->cabeza;
     while (actual) {
-        if (strcmp(actual->dato.nombre, datoBuscado.nombre) == 0 &&
-            strcmp(actual->dato.tipoDato, datoBuscado.tipoDato) == 0) {
+        if (strcmp(actual->dato.nombre, datoBuscado.nombre) == 0){
             return 1;
         }
         actual = actual->siguiente;

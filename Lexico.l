@@ -1,7 +1,9 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <limits.h>
+#include <float.h>
+#include <string.h>
 #include "y.tab.h"
 FILE  *yyin;
 int yylval;
@@ -9,7 +11,11 @@ char *yyltext;
 
 
 int yyerror(void);
-
+int validarEntero(const char *str);
+int validarFloat(const char *str);
+int validarInt16(const char *str);
+int validarFloat32(const char *str);
+int validarString(char* STR);
 %}
 
 %option noyywrap  
@@ -29,8 +35,8 @@ CORA                "["
 CORC                "]"
 DOS_PUNTOS          ":"
 
-CTE_INT            ({DIGITOSINCERO}{DIGITO}*)|0
 CTE_FLT             (({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
+CTE_INT            ({DIGITOSINCERO}{DIGITO}*)|0
 CTE_STR             \"[^"]*\" 
 ID                  {LETRA}({LETRA}|{DIGITO})*
 
@@ -48,6 +54,7 @@ DIST                "<>"
 AND                 "AND"
 OR                  "OR"
 NOT                 "NOT"
+MENOS_UNARIO         "-"
 
 /* Palabras reservadas */
 INIT                "init"
@@ -72,7 +79,7 @@ VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
 {ESCRIBIR}          {return ESCRIBIR;}
 {LEER}              {return LEER;}
 {V_FLOAT}           {return V_FLOAT;}
-{V_INT}             {return V_INT;}
+{V_INT}             {return V_INT;} 
 {V_STRING}          {return V_STRING;}
 {BINARY_COUNT}      {return BINARY_COUNT;}
 {SUMAR_ULTIMOS}     {return SUMAR_ULTIMOS;}
@@ -85,9 +92,9 @@ VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
 {OP_DIV}            {return OP_DIV;}
 {OP_MUL}            {return OP_MUL;}
 
-{CTE_INT}           {printf("\nConstante entera: %s\n",yytext);return CTE_INT;}
-{CTE_FLT}           {printf("\nConstante float: %s\n",yytext);return CTE_FLT;}
-{CTE_STR}           {printf("\nConstante string: %s\n",yytext);return CTE_STR;}
+{CTE_FLT}           {validarFloat(yytext);return CTE_FLT;}
+{CTE_INT}           {validarEntero(yytext);return CTE_INT;}
+{CTE_STR}           {validarString(yytext);return CTE_STR;}
 {ID}                {printf("\nIdentificador: %s\n",yytext);return ID;}
 
 {OP_ASIG}           {return OP_ASIG;}
@@ -115,4 +122,61 @@ VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
 "\r\n"
 .                   { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
+%%
 
+
+
+    int validarInt16(const char *str) {
+        char *endptr;
+        long valorEntero;
+
+        errno = 0;
+        valorEntero = strtol(str, &endptr, 10);
+        if (errno == 0 && *endptr == '\0' && valorEntero >= SHRT_MIN && valorEntero <= SHRT_MAX) {
+            return 1;
+        }
+        return 0; 
+    }
+
+    int validarFloat32(const char *str) {
+        char *endptr;
+        float valorFlotante;
+
+        errno = 0;
+        valorFlotante = strtof(str, &endptr);
+        printf("%f",valorFlotante);
+        if (errno == 0 && *endptr == '\0' && valorFlotante >= -FLT_MAX && valorFlotante <= FLT_MAX) {
+            return 1;
+        }
+        return 0; 
+    }
+
+    int validarString(char* STR)
+    {
+        if(strlen(STR) > 40)
+        {
+            printf("ERROR LEXICO : STR excede la capacidad maxima\n");
+            exit(1);
+        }
+        return 1;
+    }
+
+    int validarEntero(const char *str)
+    {
+        if(validarInt16(str))
+        {
+            return 1;
+        }
+            printf("ERROR LEXICO : INT excede la capacidad maxima\n");
+        exit(1);
+    }
+
+    int validarFloat(const char *str)
+    {
+        if(validarFloat32(str))
+        {
+            return 1;
+        }
+            printf("ERROR LEXICO : FLOAT excede la capacidad maxima\n");
+        exit(1);
+    }

@@ -74,7 +74,7 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 
 %%
 programa:  	   
-	declaracion cuerpo {printf(" FIN2\n");}
+	declaracion cuerpo {printf(" FIN\n");}
 	;
 cuerpo:
 	cuerpo sentencia
@@ -238,9 +238,9 @@ void guardarEnArchivo(){
 }
 void agregarLexema(const char *simboloNombre, TipoLexema tipo) {
     t_lexema lex;
-    char nombre[100] = "_";
-    char valor[100];
-    char strLongitud[10] = "";
+    char nombre[MAX_NOMBRE] = "_";
+    char valor[MAX_VALOR];
+    char strLongitud[MAX_LONGITUD] = "";
     int longitud;
 
     switch (tipo) {

@@ -1,10 +1,66 @@
-init{
-    d,c,a,torta : Float
+init {
+    a, b, c, x, y : Float
+    variable1, variable2, i, j : Int
+    p1, p2, p3, mensaje : String
+    condicion : Float
 }
 
-a := 99999.99
-a := 99.
-a := .9999
-d := "123123"
+a := 5
+b := 10
+c := a + b
 
-d := 11-(-32)
+if (a <= b AND c >= b)
+{
+    write("a a b")
+}
+
+x := 42 / c
+y := x * 3 + 5
+
+condicion := (x > y OR a < b)
+if (condicion)
+{
+    write("x es mayor que y o a")
+}
+
+while (b > 0)
+{
+    write("b es positivo")
+    b := b - 1
+}
+
+write("Ciclo terminado. b ahora es: ")
+write(b)
+
+mensaje := "Esto es un mensaje de prueba."
+write(mensaje)
+
+a := 123.456
+b := .789
+c := 0.123
+
+p1 := "Inicio"
+p2 := "Proceso"
+p3 := "Final"
+
+if (a > b)
+{
+    write("a es mayor que b")
+}
+else
+{
+    write("a es menor o igual que b")
+}
+
+condicion := (c < b)
+if (NOT condicion)
+{
+    write("c no es menor que b")
+}
+
+
+p1 := "Nuevo inicio"
+write(p1)
+
+read(variable2) 
+write(variable2)

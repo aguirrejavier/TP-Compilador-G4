@@ -48,16 +48,17 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 
 /* Operadores */
 %right OP_ASIG
-%left OP_REST OP_SUM
-%left OP_DIV OP_MUL
-%left MAY
-%left MEN
-%left MAYI
-%left MENI
-%left DIST
-%left AND
+%right MENOS_UNARIO
+%token MAY
+%token MEN
+%token MAYI
+%token MENI
+%token DIST
 %left OR
+%left AND
 %right NOT
+%left OP_REST OP_SUM
+%left OP_MUL OP_DIV
 
 /* Palabras reservadas */
 %token INIT
@@ -71,14 +72,16 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 %token V_STRING  
 %token BINARY_COUNT
 %token SUMAR_ULTIMOS
+%token VALOR_COMENTARIO
 
 %%
 programa:  	   
-	declaracion cuerpo {printf(" FIN\n");}
+	cuerpo {printf(" FIN\n");}
+	|declaracion cuerpo {printf(" FIN2\n");}
 	;
 cuerpo:
-	cuerpo sentencia
-	| sentencia
+	sentencia
+	| cuerpo sentencia
 	;
 	  
 sentencia:
@@ -89,7 +92,8 @@ sentencia:
 	| asignacion
 	| binary_count
 	| sumaLosUltimos
-	;
+	 ;
+
 
 declaracion:	
 	INIT LLAA lineas LLAC
@@ -97,7 +101,7 @@ declaracion:
 	
 lineas: 
     lineas linea
-    | linea
+    |linea
 	;
 
 linea:
@@ -116,21 +120,21 @@ tipodeDato:
 	;
 
 expresion:
-	termino {printf("\tTermino es Expresion\n");}
-	| expresion OP_SUM termino {printf("\tExpresion+Termino es Expresion\n");}
-	| expresion OP_REST termino {printf("\tExpresion-Termino es Expresion\n");}
+	expresion OP_SUM termino
+	|expresion OP_REST termino
+	|termino
 	;
 
 termino:
-	termino OP_MUL factor {printf("\tTermino*Factor es Termino\n");}
-	| termino OP_DIV factor {printf("\tTermino/Factor es Termino\n");}
-    | factor {printf("\tFactor es Termino\n");}
-	;
+	factor {printf("    Factor es Termino\n");}
+    |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
+    |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
+    ;
 
 factor:
-	OP_REST CTE_FLT {char simboloConPrefijo[40];snprintf(simboloConPrefijo, sizeof(simboloConPrefijo), "-%s", yytext);agregarLexema(simboloConPrefijo,LEXEMA_NUM);}
-	| OP_REST CTE_INT {char simboloConPrefijo[40];snprintf(simboloConPrefijo, sizeof(simboloConPrefijo), "-%s", yytext);agregarLexema(simboloConPrefijo,LEXEMA_NUM);}
-    | ID {printf("    ID es Factor \n");}
+	OP_REST CTE_FLT 
+	|OP_REST CTE_INT {agregarLexema(strcat("-",yytext),LEXEMA_NUM);}
+    |ID {printf("    ID es Factor \n");}
     | CTE_INT {agregarLexema(yytext,LEXEMA_NUM); printf("    CTE es Factor\n");}
 	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);}
 	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);}
@@ -143,18 +147,21 @@ leer:
 	;
 	
 escribir:
-	ESCRIBIR PARA tipo_de_dato PARC {printf("Estoy escribiendo");}
+	ESCRIBIR PARA CTE_STR PARC {printf("Estoy escribiendo");}
+	|ESCRIBIR PARA ID PARC {printf("Estoy escribiendo");}
 	;
 
 condiciones:
-	condicion OR condicion
-	| condicion AND condicion
-	| condicion  
+	condicion
+	|PARA condiciones PARC
+	|condicion OR condicion
+	|condicion AND condicion
 	;
 
 condicion:
-	NOT PARA comparacion PARC
+	expresion
 	|comparacion
+	|NOT condicion
 	|PARA comparacion PARC
 	;
 
@@ -180,7 +187,7 @@ while:
 	;
 
 asignacion: 
-	ID OP_ASIG expresion 
+	ID OP_ASIG condiciones
 	;
 
 tipo_de_dato:
@@ -238,15 +245,14 @@ void guardarEnArchivo(){
 }
 void agregarLexema(const char *simboloNombre, TipoLexema tipo) {
     t_lexema lex;
-    char nombre[MAX_NOMBRE] = "_";
-    char valor[MAX_VALOR];
-    char strLongitud[MAX_LONGITUD] = "";
+    char nombre[100] = "_";
+    char valor[100];
+    char strLongitud[10] = "";
     int longitud;
 
     switch (tipo) {
         case LEXEMA_ID:
             strcat(nombre, simboloNombre);
-			memmove(nombre, nombre + 1, strlen(nombre)); 
             break;
 
         case LEXEMA_NUM:

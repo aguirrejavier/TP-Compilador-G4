@@ -61,8 +61,8 @@ INIT                "init"
 MIENTRAS            "while"
 SI                  "if"
 SINO                "else"
-ESCRIBIR            "escribir"
-LEER                "leer"
+ESCRIBIR            "write"
+LEER                "read"
 V_FLOAT             "Float"
 V_INT               "Int"
 V_STRING            "String"
@@ -113,7 +113,7 @@ VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
 {LLAA}              {return LLAA;}
 {LLAC}              {return LLAC;}
 {DOS_PUNTOS}        {return DOS_PUNTOS;}
-{VALOR_COMENTARIO}  
+{VALOR_COMENTARIO}  {return VALOR_COMENTARIO;}
 
 "\n"      		
 "\t"
@@ -124,57 +124,59 @@ VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
 
 %%
 
-int validarInt16(const char *str) {
-    char *endptr;
-    long valorEntero;
 
-    errno = 0;
-    valorEntero = strtol(str, &endptr, 10);
-    if (errno == 0 && *endptr == '\0' && valorEntero >= SHRT_MIN && valorEntero <= SHRT_MAX) {
-        return 1;
+
+    int validarInt16(const char *str) {
+        char *endptr;
+        long valorEntero;
+
+        errno = 0;
+        valorEntero = strtol(str, &endptr, 10);
+        if (errno == 0 && *endptr == '\0' && valorEntero >= SHRT_MIN && valorEntero <= SHRT_MAX) {
+            return 1;
+        }
+        return 0; 
     }
-    return 0; 
-}
 
-int validarFloat32(const char *str) {
-    char *endptr;
-    float valorFlotante;
+    int validarFloat32(const char *str) {
+        char *endptr;
+        float valorFlotante;
 
-    errno = 0;
-    valorFlotante = strtof(str, &endptr);
-    printf("%f",valorFlotante);
-    if (errno == 0 && *endptr == '\0' && valorFlotante >= -FLT_MAX && valorFlotante <= FLT_MAX) {
-        return 1;
+        errno = 0;
+        valorFlotante = strtof(str, &endptr);
+        printf("%f",valorFlotante);
+        if (errno == 0 && *endptr == '\0' && valorFlotante >= -FLT_MAX && valorFlotante <= FLT_MAX) {
+            return 1;
+        }
+        return 0; 
     }
-    return 0; 
-}
 
-int validarString(char* STR)
-{
-    if(strlen(STR) > 40)
+    int validarString(char* STR)
     {
-        printf("ERROR LEXICO : STR excede la capacidad maxima\n");
+        if(strlen(STR) > 40)
+        {
+            printf("ERROR LEXICO : STR excede la capacidad maxima\n");
+            exit(1);
+        }
+        return 1;
+    }
+
+    int validarEntero(const char *str)
+    {
+        if(validarInt16(str))
+        {
+            return 1;
+        }
+            printf("ERROR LEXICO : INT excede la capacidad maxima\n");
         exit(1);
     }
-    return 1;
-}
 
-int validarEntero(const char *str)
-{
-    if(validarInt16(str))
+    int validarFloat(const char *str)
     {
-        return 1;
+        if(validarFloat32(str))
+        {
+            return 1;
+        }
+            printf("ERROR LEXICO : FLOAT excede la capacidad maxima\n");
+        exit(1);
     }
-        printf("ERROR LEXICO : INT excede la capacidad maxima\n");
-    exit(1);
-}
-
-int validarFloat(const char *str)
-{
-    if(validarFloat32(str))
-    {
-        return 1;
-    }
-        printf("ERROR LEXICO : FLOAT excede la capacidad maxima\n");
-    exit(1);
-}

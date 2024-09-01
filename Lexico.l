@@ -68,7 +68,7 @@ V_INT               "Int"
 V_STRING            "String"
 BINARY_COUNT        "binaryCount"
 SUMAR_ULTIMOS       "sumaLosUltimos"
-VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
+VALOR_COMENTARIO    "*-"[^-\%\&\|\;\@\#\^\~\$]*"-*"
 
 
 %%
@@ -113,7 +113,7 @@ VALOR_COMENTARIO    "\*-[^\%\&\|\;\@\#\^\~\$]*-\*"
 {LLAA}              {return LLAA;}
 {LLAC}              {return LLAC;}
 {DOS_PUNTOS}        {return DOS_PUNTOS;}
-{VALOR_COMENTARIO}  {return VALOR_COMENTARIO;}
+{VALOR_COMENTARIO}
 
 "\n"      		
 "\t"

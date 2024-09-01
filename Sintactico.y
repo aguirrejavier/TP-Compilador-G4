@@ -72,12 +72,10 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 %token V_STRING  
 %token BINARY_COUNT
 %token SUMAR_ULTIMOS
-%token VALOR_COMENTARIO
 
 %%
 programa:  	   
-	cuerpo {printf(" FIN\n");}
-	|declaracion cuerpo {printf(" FIN2\n");}
+	declaracion cuerpo {printf(" FIN\n");}
 	;
 cuerpo:
 	sentencia
@@ -133,8 +131,8 @@ termino:
 
 factor:
 	OP_REST CTE_FLT 
-	|OP_REST CTE_INT {agregarLexema(strcat("-",yytext),LEXEMA_NUM);}
-    |ID {printf("    ID es Factor \n");}
+	| OP_REST CTE_INT {agregarLexema(strcat("-",yytext),LEXEMA_NUM);}
+    | ID {printf("    ID es Factor \n");}
     | CTE_INT {agregarLexema(yytext,LEXEMA_NUM); printf("    CTE es Factor\n");}
 	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);}
 	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);}

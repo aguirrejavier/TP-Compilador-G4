@@ -144,7 +144,6 @@ VALOR_COMENTARIO    "*-"[^-\%\&\|\;\@\#\^\~\$]*"-*"
 
         errno = 0;
         valorFlotante = strtof(str, &endptr);
-        printf("%f",valorFlotante);
         if (errno == 0 && *endptr == '\0' && valorFlotante >= -FLT_MAX && valorFlotante <= FLT_MAX) {
             return 1;
         }

@@ -203,7 +203,14 @@ lista:
 	;
 
 elementos: 
-	CTE_INT COMA elementos | ID COMA elementos | ID | CTE_INT	
+	elemento_binario COMA elementos
+	| elemento_binario
+	;
+
+elemento_binario: 
+	CTE_INT
+	| OP_REST CTE_INT
+	| ID
 	;
 
 sumaLosUltimos: 

@@ -69,3 +69,9 @@ write(p1)
 *- Ejemplo de lectura y escritura -*
 read(variable2) 
 write(variable2)
+
+*- Ejemplo binaryCount -*
+y := binaryCount([110,1,0,5,x,1010,-1])
+
+*- Ejemplo sumaLosUltimos -*
+x := sumaLosUltimos(4; [28, 13.5, 4, 5.5, 17, 52]) 

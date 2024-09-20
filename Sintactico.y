@@ -136,7 +136,6 @@ factor:
     | CTE_INT {agregarLexema(yytext,LEXEMA_NUM); printf("    CTE es Factor\n");}
 	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);}
 	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);}
-	| PARA expresion PARC {printf("    Expresion entre parentesis es Factor\n");}
     ;
 
 leer: 
@@ -160,7 +159,6 @@ condicion:
 	expresion
 	|comparacion
 	|NOT condicion
-	|PARA comparacion PARC
 	;
 
 comparacion:

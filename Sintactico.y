@@ -32,6 +32,9 @@ ta_nodo* ptr_sent;
 ta_nodo* ptr_asig;
 ta_nodo* ptr_conds;
 ta_nodo* ptr_cond;
+ta_nodo* ptr_sinsino;
+ta_nodo* ptr_if;
+ta_nodo* ptr_cuerciclo;
 
 t_pila* pila_exp;
 
@@ -108,13 +111,18 @@ programa:
 	;
 cuerpo:
 	sentencia {ptr_cuer = ptr_sent;}
-	| cuerpo sentencia {ptr_cuer = crearNodo("sentencia",ptr_cuer,ptr_sent);}
+	| cuerpo sentencia {ptr_cuer = crearNodo("sentencia",ptr_cuer,ptr_sent);printf("cuerpo: cuerpo sentencia\n");}
+	;
+
+cuerpo_ciclo:
+	sentencia {ptr_cuerciclo = ptr_sent;}
+	| cuerpo_ciclo sentencia {ptr_cuerciclo = crearNodo("sentencia",ptr_cuerciclo,ptr_sent);printf("cuerpo: cuerpo sentencia\n");}
 	;
 	  
 sentencia:
 	leer
 	| escribir
-	| if
+	| if {ptr_sent = ptr_if;printf("sentencia sentencia = if\n");}
 	| while
 	| asignacion {ptr_sent = ptr_asig;}
 	| binary_count
@@ -147,9 +155,9 @@ tipodeDato:
 	;
 
 expresion:
-	expresion OP_SUM termino{ptr_exp = crearNodo("+",ptr_exp,ptr_ter);}
-	|expresion OP_REST termino{ptr_exp = crearNodo("-",ptr_exp,ptr_ter);}
-	|termino {ptr_exp = ptr_ter;}
+	expresion OP_SUM termino{ptr_exp = crearNodo("+",ptr_exp,ptr_ter);printf("     Expresion+Termino es Expresion\n");}
+	|expresion OP_REST termino{ptr_exp = crearNodo("-",ptr_exp,ptr_ter);printf("     Expresion-Termino es Expresion\n");}
+	|termino {ptr_exp = ptr_ter;printf("    Termino es Expresion\n");}
 	;
 
 termino:
@@ -160,9 +168,9 @@ termino:
 
 factor:
 	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n");}
-    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE es Factor\n");}
-	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1);}
-	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);ptr_fact = crearHoja($1);}
+    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
+	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_FLT es Factor\n");}
+	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}
     ;
 
 leer: 
@@ -197,16 +205,16 @@ comparacion:
 	;
 
 if:
-    sin_sino
-	|sin_sino SINO LLAA cuerpo LLAC 
+    sin_sino {ptr_if = ptr_sinsino; printf("sentencia if\n");}
+	|sin_sino SINO LLAA cuerpo_ciclo LLAC 
 	;
 
 sin_sino:
-	SI PARA condiciones PARC LLAA cuerpo LLAC
+	SI PARA condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearHoja("condicion"),crearHoja("cuerpo"));printf("sentencia sin_sino\n"); }
 	;
 
 while:
-	MIENTRAS PARA condiciones PARC LLAA cuerpo LLAC 
+	MIENTRAS PARA condiciones PARC LLAA cuerpo_ciclo LLAC 
 	;
 
 asignacion: 

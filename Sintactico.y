@@ -5,15 +5,36 @@
 #include <stdlib.h>
 #include <string.h>
 #include "y.tab.h"
-#include "Lista.h"
+#include "bin/Lista.h"
+#include "bin/arbol.h"
+#include "bin/stack.h"
 
 #define SYMBOL_TABLE "symbol-table.txt"
+#define DOT_FILE "arbol.dot"
+#define INTERMEDIA_FILE "intermedia.txt"
+
 
 int yystopparser=0;
 FILE  *yyin;
 char *yytext;
 
 Lista tablaSimbolos;
+FILE  *file_dot;
+FILE  *file_intermedia;
+
+ta_nodo* ptr_progr;
+ta_nodo* ptr_exp;
+ta_nodo* ptr_fact;
+ta_nodo* ptr_ter;
+
+ta_nodo* ptr_cuer;
+ta_nodo* ptr_sent;
+ta_nodo* ptr_asig;
+ta_nodo* ptr_conds;
+ta_nodo* ptr_cond;
+
+t_pila* pila_exp;
+
 typedef enum {
     LEXEMA_ID,
     LEXEMA_NUM,
@@ -25,7 +46,15 @@ int yylex();
 void guardarEnArchivo();
 void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 
+
 %}
+
+%union{
+    char * sid;
+    char * snum;
+	char * sfloat;
+	char * str;
+}
 
 %token DIGITO
 %token DIGITOSINCERO
@@ -41,10 +70,10 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 %token CORC
 %token DOS_PUNTOS
 
-%token CTE_INT
-%token CTE_FLT
-%token CTE_STR
-%token ID
+%token <snum>CTE_INT
+%token <sfloat>CTE_FLT
+%token <str>CTE_STR
+%token <sid>ID
 
 /* Operadores */
 %right OP_ASIG
@@ -75,11 +104,11 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 
 %%
 programa:  	   
-	declaracion cuerpo {printf(" FIN\n");}
+	declaracion cuerpo {ptr_progr = crearNodo("programa",NULL,ptr_cuer);recorrerInOrder(&ptr_progr, file_intermedia);printf(" FIN\n");}
 	;
 cuerpo:
-	sentencia
-	| cuerpo sentencia
+	sentencia {ptr_cuer = ptr_sent;}
+	| cuerpo sentencia {ptr_cuer = crearNodo("sentencia",ptr_cuer,ptr_sent);}
 	;
 	  
 sentencia:
@@ -87,7 +116,7 @@ sentencia:
 	| escribir
 	| if
 	| while
-	| asignacion
+	| asignacion {ptr_sent = ptr_asig;}
 	| binary_count
 	| sumaLosUltimos
 	 ;
@@ -118,24 +147,22 @@ tipodeDato:
 	;
 
 expresion:
-	expresion OP_SUM termino
-	|expresion OP_REST termino
-	|termino
+	expresion OP_SUM termino{ptr_exp = crearNodo("+",ptr_exp,ptr_ter);}
+	|expresion OP_REST termino{ptr_exp = crearNodo("-",ptr_exp,ptr_ter);}
+	|termino {ptr_exp = ptr_ter;}
 	;
 
 termino:
-	factor {printf("    Factor es Termino\n");}
-    |termino OP_MUL factor {printf("     Termino*Factor es Termino\n");}
-    |termino OP_DIV factor {printf("     Termino/Factor es Termino\n");}
+	factor {ptr_ter=ptr_fact;printf("    Factor es Termino\n");}
+    |termino OP_MUL factor {ptr_ter = crearNodo("*",ptr_ter,ptr_fact);printf("     Termino*Factor es Termino\n");}
+    |termino OP_DIV factor {ptr_ter = crearNodo("/",ptr_ter,ptr_fact);printf("     Termino/Factor es Termino\n");}
     ;
 
 factor:
-	OP_REST CTE_FLT 
-	| OP_REST CTE_INT {agregarLexema(strcat("-",yytext),LEXEMA_NUM);}
-    | ID {printf("    ID es Factor \n");}
-    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM); printf("    CTE es Factor\n");}
-	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);}
-	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);}
+	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n");}
+    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE es Factor\n");}
+	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1);}
+	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);ptr_fact = crearHoja($1);}
     ;
 
 leer: 
@@ -149,14 +176,14 @@ escribir:
 	;
 
 condiciones:
-	condicion
+	condicion {ptr_conds = ptr_cond;}
 	|PARA condiciones PARC
 	|condicion OR condicion
 	|condicion AND condicion
 	;
 
 condicion:
-	expresion
+	expresion {ptr_cond = ptr_exp;}
 	|comparacion
 	|NOT condicion
 	;
@@ -183,7 +210,7 @@ while:
 	;
 
 asignacion: 
-	ID OP_ASIG condiciones
+	ID OP_ASIG condiciones {ptr_asig = crearNodo("=",crearHoja($1),ptr_conds);}
 	;
 
 tipo_de_dato:
@@ -296,11 +323,23 @@ int main(int argc, char *argv[])
     if((yyin = fopen(argv[1], "rt"))==NULL){
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
     }
-    else{ 
-    	yyparse();
+    if ((file_dot = fopen(DOT_FILE, "wt")) == NULL)
+    {
+	    printf("\nERROR! No se pudo abrir el archivo .dot para armar el arbol\n");
+	    return 1;
+    } 
+    if ((file_intermedia = fopen(INTERMEDIA_FILE, "wt")) == NULL)
+    {
+	    printf("\nERROR! No se pudo abrir el archivo intermedia\n");
+	    return 1;
     }
+	pila_exp = crearPila();
+    yyparse();
+    
 	guardarEnArchivo();
 	fclose(yyin);
+	fclose(file_intermedia);
+    generarArchivoDOT(&ptr_progr, file_dot);
     return 0;
 }
 int yyerror(void)

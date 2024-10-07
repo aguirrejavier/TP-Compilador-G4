@@ -6,7 +6,6 @@
 #include <string.h>
 #include "y.tab.h"
 FILE  *yyin;
-int yylval;
 char *yyltext;
 
 
@@ -54,7 +53,6 @@ DIST                "<>"
 AND                 "AND"
 OR                  "OR"
 NOT                 "NOT"
-MENOS_UNARIO         "-"
 
 /* Palabras reservadas */
 INIT                "init"
@@ -92,10 +90,10 @@ VALOR_COMENTARIO    "*-"[^-\%\&\|\;\@\#\^\~\$]*"-*"
 {OP_DIV}            {return OP_DIV;}
 {OP_MUL}            {return OP_MUL;}
 
-{CTE_FLT}           {validarFloat(yytext);return CTE_FLT;}
-{CTE_INT}           {validarEntero(yytext);return CTE_INT;}
-{CTE_STR}           {validarString(yytext);return CTE_STR;}
-{ID}                {printf("\nIdentificador: %s\n",yytext);return ID;}
+{CTE_FLT}           {validarFloat(yytext);yylval.sfloat = strdup(yytext);return CTE_FLT;}
+{CTE_INT}           {validarEntero(yytext);yylval.snum = strdup(yytext);return CTE_INT;}
+{CTE_STR}           {validarString(yytext);yylval.str = strdup(yytext);return CTE_STR;}
+{ID}                {printf("\nIdentificador: %s\n",yytext);yylval.sid = strdup(yytext);return ID;}
 
 {OP_ASIG}           {return OP_ASIG;}
 

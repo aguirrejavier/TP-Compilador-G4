@@ -2,7 +2,7 @@
 flex Lexico.l
 bison -dyv Sintactico.y
 
-gcc.exe lex.yy.c y.tab.c Lista.c -o compilador.exe
+gcc.exe lex.yy.c y.tab.c "bin\Lista.c" "bin\arbol.c" "bin\stack.c" -o compilador.exe
 
 compilador.exe prueba.txt
 

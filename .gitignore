@@ -53,7 +53,7 @@ Mkfile.old
 dkms.conf
 
 ### FlexBuilder template
-bin/
+#bin/
 bin-debug/
 bin-release/
 

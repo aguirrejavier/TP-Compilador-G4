@@ -37,6 +37,18 @@ ta_nodo* ptr_if;
 ta_nodo* ptr_cuerciclo;
 ta_nodo* ptr_true;
 ta_nodo* ptr_false;
+ta_nodo* ptr_sumaLosUltimos;
+ta_nodo* ptr_sumaLosUltimos_aux;
+ta_nodo* ptr_lista_nros;
+ta_nodo* ptr_elementos_nros;
+ta_nodo* ptr_elementos_nros_aux;
+ta_nodo* ptr_elementos_nros_aux2;
+ta_nodo* ptr_cte_admitida;
+
+char pivot[50];
+int pivote;
+float auxSumaUltimos=0;
+int contSumaUltimos;
 
 t_pila* pila_exp;
 
@@ -128,7 +140,7 @@ sentencia:
 	| while
 	| asignacion {ptr_sent = ptr_asig;}
 	| binary_count
-	| sumaLosUltimos
+	| sumaLosUltimos {ptr_sent = ptr_sumaLosUltimos;}
 	 ;
 
 
@@ -249,19 +261,56 @@ elemento_binario:
 	;
 
 sumaLosUltimos: 
-	ID OP_ASIG SUMAR_ULTIMOS PARA CTE_INT PYC lista_nros PARC
+	ID OP_ASIG SUMAR_ULTIMOS PARA CTE_INT {
+		strcpy(pivot,$5);
+		pivote= atoi($5);
+		printf("PIVOT: %s \n", pivot);
+		printf("PIVOT FLOAT: %d \n", pivote);
+		ptr_sumaLosUltimos_aux = crearNodo("=",crearHoja("PIVOT"),crearHoja(pivot));
+	} 
+	PYC lista_nros PARC { 
+		char *cadena = (char *)malloc(20 * sizeof(char));
+		sprintf(cadena, "%.2f", auxSumaUltimos);
+		ptr_sumaLosUltimos = crearNodo("=",crearHoja($1),crearHoja(cadena));
+		ptr_sumaLosUltimos = crearNodo(";",ptr_lista_nros,ptr_sumaLosUltimos);
+		ptr_sumaLosUltimos = crearNodo("SUMULT",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
+		}
 	;
 
 lista_nros: 
-	CORA elementos_nros CORC
+	CORA elementos_nros CORC {ptr_lista_nros = ptr_elementos_nros;}
 	;
 
 elementos_nros: 
-	cte_admitida COMA elementos_nros | cte_admitida
+	elementos_nros COMA cte_admitida 
+	{
+		contSumaUltimos = contSumaUltimos + 1;
+		int aux=0;
+		ta_nodo nodoAux = *ptr_cte_admitida;
+		aux = atoi(nodoAux.descripcion);
+		if(contSumaUltimos >= pivote) { auxSumaUltimos = auxSumaUltimos + aux; }
+		ptr_elementos_nros_aux = crearNodo("+",crearHoja("@cant"),ptr_cte_admitida);
+		ptr_elementos_nros_aux = crearNodo("=",crearHoja("@cant"),ptr_elementos_nros_aux);
+		ptr_elementos_nros_aux = crearNodo("IF",crearNodo(">=",crearHoja("@cont"),crearHoja(pivot)),ptr_elementos_nros_aux);
+		ptr_elementos_nros_aux2 = crearNodo("+",crearHoja("@cont"),crearHoja("1"));
+		ptr_elementos_nros_aux2 = crearNodo("=",crearHoja("@cont"),ptr_elementos_nros_aux2);
+		ptr_elementos_nros_aux = crearNodo("suma_si",ptr_elementos_nros_aux2,ptr_elementos_nros_aux);
+		ptr_elementos_nros = crearNodo("suma_si",ptr_elementos_nros,ptr_elementos_nros_aux);
+		
+	}
+	| cte_admitida {
+		ptr_elementos_nros = crearNodo("=",crearHoja("@cont"),crearHoja("1"));
+		ptr_elementos_nros_aux = crearNodo("+",crearHoja("@cant"),ptr_cte_admitida);
+		ptr_elementos_nros_aux = crearNodo("=",crearHoja("@cant"),ptr_elementos_nros_aux);
+		ptr_elementos_nros_aux = crearNodo("IF",crearNodo(">=",crearHoja("@cont"),crearHoja(pivot)),ptr_elementos_nros_aux);
+		ptr_elementos_nros = crearNodo("suma_si",ptr_elementos_nros,ptr_elementos_nros_aux);
+		contSumaUltimos = 1;
+	}
 	;
 
 cte_admitida: 
-	CTE_INT | CTE_FLT
+	 CTE_FLT {ptr_cte_admitida = crearHoja($1);}
+	| CTE_INT  {ptr_cte_admitida = crearHoja($1);}
 	;	
 %%
 

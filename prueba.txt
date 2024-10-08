@@ -16,3 +16,16 @@ if (a <= b AND c >= b)
     write("a a b")
 }
 
+x := 42 / c
+y := x * 3 + 5
+
+si (a > b)
+{
+    write("a es mayor que b")
+}
+else
+{
+    write("a es menor o igual que b")
+}
+
+x := sumaLosUltimos(4; [28, 13.5, 4, 5.5, 17, 52]) 

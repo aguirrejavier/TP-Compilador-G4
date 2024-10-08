@@ -17,13 +17,3 @@ _5                                       ||            || 5                     
 _10                                      ||            || 10                                                 ||           
 _42                                      ||            || 42                                                 ||           
 _3                                       ||            || 3                                                  ||           
-_0                                       ||            || 0                                                  ||           
-_1                                       ||            || 1                                                  ||           
-_Esto es un mensaje de prueba.           ||            || Esto es un mensaje de prueba.                      || 29        
-_123.456                                 ||            || 123.456                                            ||           
-_.789                                    ||            || .789                                               ||           
-_0.123                                   ||            || 0.123                                              ||           
-_Inicio                                  ||            || Inicio                                             || 6         
-_Proceso                                 ||            || Proceso                                            || 7         
-_Final                                   ||            || Final                                              || 5         
-_Nuevo inicio                            ||            || Nuevo inicio                                       || 12        

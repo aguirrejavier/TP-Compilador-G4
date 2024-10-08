@@ -285,9 +285,10 @@ elementos_nros:
 	elementos_nros COMA cte_admitida 
 	{
 		contSumaUltimos = contSumaUltimos + 1;
-		int aux=0;
+		float aux=0;
+		char* endPtr;
 		ta_nodo nodoAux = *ptr_cte_admitida;
-		aux = atoi(nodoAux.descripcion);
+		aux = strtof(nodoAux.descripcion, &endPtr);
 		if(contSumaUltimos >= pivote) { auxSumaUltimos = auxSumaUltimos + aux; }
 		ptr_elementos_nros_aux = crearNodo("+",crearHoja("@cant"),ptr_cte_admitida);
 		ptr_elementos_nros_aux = crearNodo("=",crearHoja("@cant"),ptr_elementos_nros_aux);

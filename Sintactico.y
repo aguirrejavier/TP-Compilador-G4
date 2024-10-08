@@ -35,6 +35,8 @@ ta_nodo* ptr_cond;
 ta_nodo* ptr_sinsino;
 ta_nodo* ptr_if;
 ta_nodo* ptr_cuerciclo;
+ta_nodo* ptr_true;
+ta_nodo* ptr_false;
 
 t_pila* pila_exp;
 
@@ -206,11 +208,11 @@ comparacion:
 
 if:
     sin_sino {ptr_if = ptr_sinsino; printf("sentencia if\n");}
-	|sin_sino SINO LLAA cuerpo_ciclo LLAC 
+	|sin_sino{ptr_true = ptr_sinsino->hijoDerecho; } SINO LLAA cuerpo_ciclo LLAC { ptr_sinsino->hijoDerecho = crearNodo("cuerpo",ptr_true ,crearHoja("cuerpo_false")); ptr_if = ptr_sinsino;}
 	;
 
 sin_sino:
-	SI PARA condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearHoja("condicion"),crearHoja("cuerpo"));printf("sentencia sin_sino\n"); }
+	SI PARA condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearHoja("condicion"),crearHoja("cuerpo_true"));printf("sentencia sin_sino\n"); }
 	;
 
 while:

@@ -134,8 +134,8 @@ cuerpo_ciclo:
 	;
 	  
 sentencia:
-	leer
-	| escribir
+	leer {ptr_sent = ptr_leer;}
+	| escribir {ptr_sent = ptr_escribir;}
 	| if {ptr_sent = ptr_if;printf("sentencia sentencia = if\n");}
 	| while
 	| asignacion {ptr_sent = ptr_asig;}
@@ -188,34 +188,34 @@ factor:
     ;
 
 leer: 
-	LEER PARA ID PARC {printf("Estoy leyendo una ID");}
-	|LEER PARA tipo_de_dato PARC {printf("Estoy leyendo un tipo_de_Dato");}
+	LEER PARA ID PARC {printf("Estoy leyendo una ID"); ptr_leer_id = crearNodo(";";crearHoja(ID); crearHoja("leer"); printf("leer id\n");}}
+	|LEER PARA tipo_de_dato PARC {printf("Estoy leyendo un tipo_de_Dato"); ptr_leer_tipo_de_dato = crearNodo(";";crearHoja(tipo_de_dato); crearHoja("leer"); printf("leer cte\n");}}
 	;
 	
 escribir:
-	ESCRIBIR PARA CTE_STR PARC {printf("Estoy escribiendo");}
-	|ESCRIBIR PARA ID PARC {printf("Estoy escribiendo");}
+	ESCRIBIR PARA CTE_STR PARC {printf("Estoy escribiendo"); ptr_escribir_cte = crearNodo(";";crearHoja(CTE_STR); crearHoja("escribir"); printf("escribir cte\n");}}
+	|ESCRIBIR PARA ID PARC {printf("Estoy escribiendo"); ptr_escribir_id = crearNodo(";";crearHoja(ID); crearHoja("escribir"); printf("escribir id\n");}}
 	;
 
 condiciones:
 	condicion {ptr_conds = ptr_cond;}
 	|PARA condiciones PARC
-	|condicion OR condicion
-	|condicion AND condicion
+	|condicion {apilar(pila_exp; ptr_cond);} OR condicion {ptr_conds = crearNodo(OR;desapilar(pila_exp); ptr_cond);}
+	|condicion {apilar(pila_exp; ptr_cond);} AND condicion {ptr_conds = crearNodo(AND;desapilar(pila_exp); ptr_cond);}
 	;
 
 condicion:
 	expresion {ptr_cond = ptr_exp;}
-	|comparacion
-	|NOT condicion
+	|comparacion {ptr_cond = ptr_comp;}
+	|NOT condicion {ptr_cond = crearNodo(NOT;NULL; ptr_cond);}
 	;
 
 comparacion:
-	expresion 		MAY 	expresion
-	|expresion 		MEN 	expresion
-	|expresion 		MAYI 	expresion
-	|expresion		MENI	expresion
-	|expresion		DIST	expresion
+	expresion   {apilar(pila_exp; ptr_exp);}	MAY 	expresion {ptr_comp = crearNodo(MAY; desapilar(pila_exp); ptr_exp);}
+	|expresion 	{apilar(pila_exp; ptr_exp);}	MEN 	expresion {ptr_comp = crearNodo(MEN; desapilar(pila_exp); ptr_exp);}
+	|expresion 	{apilar(pila_exp; ptr_exp);}	MAYI 	expresion {ptr_comp = crearNodo(MAYI; desapilar(pila_exp); ptr_exp);}
+	|expresion	{apilar(pila_exp; ptr_exp);}	MENI	expresion {ptr_comp = crearNodo(MANI; desapilar(pila_exp); ptr_exp);}
+	|expresion	{apilar(pila_exp; ptr_exp);}	DIST	expresion {ptr_comp = crearNodo(DIST; desapilar(pila_exp); ptr_exp);}
 	;
 
 if:

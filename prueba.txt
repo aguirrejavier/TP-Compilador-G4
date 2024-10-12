@@ -5,27 +5,13 @@ init {
     condicion : Float
 }
 
-*- Ejemplo de asignaciones-*
-a := 5
-b := 10
-c := a + b
+a := 15
+write("PRUEBA")
+b := 7
 
-*- Ejemplo de if -*
-if (a <= b AND c >= b)
+if(a > 10 AND b < 5)
 {
-    write("a a b")
+    write("se cumple la condicion")
 }
 
-x := 42 / c
-y := x * 3 + 5
-
-si (a > b)
-{
-    write("a es mayor que b")
-}
-else
-{
-    write("a es menor o igual que b")
-}
-
-x := sumaLosUltimos(4; [28, 13.5, 4, 5.5, 17, 52]) 
+write("PRUEBA")

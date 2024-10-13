@@ -188,7 +188,7 @@ termino:
 
 factor:
 	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n");}
-	| CTE_BIM {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
+	| CTE_BIN {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
     	| CTE_INT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
 	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_FLT es Factor\n");}
 	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}

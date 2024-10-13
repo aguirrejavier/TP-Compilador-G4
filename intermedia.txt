@@ -1,1 +1,1 @@
- programa   a   =   15   sentencia   sentencia   b   =   7   sentencia   condicion   if   cuerpo_true   sentencia  
+ programa   a   =   15   sentencia   leer   "PRUEBA"   sentencia   b   =   7   sentencia   BINARY_COUNT   y   =   cant   sentencia   condicion   a   +   3   >   b   *   c   AND   y   <>   x   if   escribir   "a es mayor que b"   cuerpo   escribir   "a es menor o igual que b"  

@@ -6,12 +6,16 @@ init {
 }
 
 a := 15
-write("PRUEBA")
+leer("PRUEBA")
 b := 7
 
-if(a > 10 AND b < 5)
-{
-    write("se cumple la condicion")
-}
+y := binaryCount([1,1,1,1,5])
 
-write("PRUEBA")
+si (a+3 > b*c AND y <> x)       
+{
+    write("a es mayor que b")
+}
+else
+{
+    write("a es menor o igual que b")
+}

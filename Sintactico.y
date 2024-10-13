@@ -46,14 +46,12 @@ ta_nodo* ptr_elementos_nros_aux2;
 ta_nodo* ptr_cte_admitida;
 ta_nodo* ptr_leer;
 ta_nodo* ptr_escribir;
-ta_nodo* ptr_leer_id;
-ta_nodo* ptr_leer_tipo_de_dato;
-ta_nodo* ptr_escribir_cte;
-ta_nodo* ptr_escribir_id;
 ta_nodo* ptr_comp;
+ta_nodo* ptr_binc;
 
 char pivot[50];
 int pivote;
+int cant;
 float auxSumaUltimos=0;
 int contSumaUltimos;
 
@@ -94,6 +92,7 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 %token CORC
 %token DOS_PUNTOS
 
+%token <snum>CTE_BIN
 %token <snum>CTE_INT
 %token <sfloat>CTE_FLT
 %token <str>CTE_STR
@@ -146,7 +145,7 @@ sentencia:
 	| if {ptr_sent = ptr_if;printf("sentencia sentencia = if\n");}
 	| while
 	| asignacion {ptr_sent = ptr_asig;}
-	| binary_count
+	| binary_count {ptr_sent = ptr_binc;}
 	| sumaLosUltimos {ptr_sent = ptr_sumaLosUltimos;}
 	 ;
 
@@ -194,20 +193,13 @@ factor:
 	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}
     ;
 
-tipo_de_dato:
-	CTE_INT
-	|CTE_FLT
-	|CTE_STR
-	;
-
 leer: 
-	LEER PARA ID PARC {printf("Estoy leyendo una ID"); ptr_leer_id = crearNodo(";",crearHoja("ID"), crearHoja("leer")); printf("leer id\n");}
-	|LEER PARA tipo_de_dato PARC {printf("Estoy leyendo un tipo_de_Dato"); ptr_leer_tipo_de_dato = crearNodo(";",crearHoja("tipo_de_dato"), crearHoja("leer")); printf("leer cte\n");}
+	LEER PARA factor PARC {ptr_leer = crearNodo("leer",NULL, ptr_fact); printf("leer");}
 	;
 
 escribir:
-	ESCRIBIR PARA CTE_STR PARC {printf("Estoy escribiendo\n"); ptr_escribir_cte = crearNodo(";",crearHoja("CTE_STR"), crearHoja("escribir")); printf("escribir cte\n");}
-	|ESCRIBIR PARA ID PARC {printf("Estoy escribiendo\n"); ptr_escribir_id = crearNodo(";",crearHoja("ID"), crearHoja("escribir")); printf("escribir id\n");}
+	ESCRIBIR PARA CTE_STR PARC {printf($3); ptr_escribir = crearNodo("escribir",NULL, crearHoja($3));}
+	|ESCRIBIR PARA ID PARC {printf($3); ptr_escribir = crearNodo("escribir",NULL, crearHoja($3));}
 	;
 
 condiciones:
@@ -224,21 +216,23 @@ condicion:
 	;
 
 comparacion:
-	expresion   {apilar(pila_exp, ptr_exp);}	MAY 	expresion {ptr_comp = crearNodo("MAY", desapilar(pila_exp), ptr_exp);}
-	|expresion 	{apilar(pila_exp, ptr_exp);}	MEN 	expresion {ptr_comp = crearNodo("MEN", desapilar(pila_exp), ptr_exp);}
-	|expresion 	{apilar(pila_exp, ptr_exp);}	MAYI 	expresion {ptr_comp = crearNodo("MAYI", desapilar(pila_exp), ptr_exp);}
-	|expresion	{apilar(pila_exp, ptr_exp);}	MENI	expresion {ptr_comp = crearNodo("MENI", desapilar(pila_exp), ptr_exp);}
-	|expresion	{apilar(pila_exp, ptr_exp);}	DIST	expresion {ptr_comp = crearNodo("DIST", desapilar(pila_exp), ptr_exp);}
+	expresion   {apilar(pila_exp, ptr_exp);}	MAY 	expresion {ptr_comp = crearNodo(">", desapilar(pila_exp), ptr_exp);}
+	|expresion 	{apilar(pila_exp, ptr_exp);}	MEN 	expresion {ptr_comp = crearNodo("<", desapilar(pila_exp), ptr_exp);}
+	|expresion 	{apilar(pila_exp, ptr_exp);}	MAYI 	expresion {ptr_comp = crearNodo(">=", desapilar(pila_exp), ptr_exp);}
+	|expresion	{apilar(pila_exp, ptr_exp);}	MENI	expresion {ptr_comp = crearNodo("<=", desapilar(pila_exp), ptr_exp);}
+	|expresion	{apilar(pila_exp, ptr_exp);}	DIST	expresion {ptr_comp = crearNodo("<>", desapilar(pila_exp), ptr_exp);}
 	;
 
 if:
     sin_sino {ptr_if = ptr_sinsino; printf("sentencia if\n");}
-	|sin_sino{ptr_true = ptr_sinsino->hijoDerecho; } SINO LLAA cuerpo_ciclo LLAC { ptr_sinsino->hijoDerecho = crearNodo("cuerpo",ptr_true ,crearHoja("cuerpo_false")); ptr_if = ptr_sinsino;}
+	|sin_sino SINO LLAA cuerpo_ciclo LLAC { ptr_true->hijoDerecho = ptr_cuerciclo; ptr_if = ptr_sinsino;}
 	;
 
 sin_sino:
-	SI PARA condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearHoja("condicion"),crearHoja("cuerpo_true"));printf("sentencia sin_sino\n"); }
+	SI PARA condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearNodo("condicion",NULL,ptr_conds) , ptr_true = crearNodo("cuerpo",ptr_cuerciclo,NULL));printf("sentencia sin_sino\n"); }
 	;
+	
+
 
 while:
 	MIENTRAS PARA condiciones PARC LLAA cuerpo_ciclo LLAC 
@@ -249,7 +243,7 @@ asignacion:
 	;
 
 binary_count:
-	ID OP_ASIG BINARY_COUNT PARA lista PARC
+	ID OP_ASIG { cant = 0;} BINARY_COUNT PARA lista PARC {ptr_binc = crearNodo("=",crearHoja($1),crearHoja("cant"));ptr_binc = crearNodo("BINARY_COUNT",NULL,ptr_binc);printf("HOLACUNATO?%d",cant);}
 	;
 
 lista: 
@@ -257,14 +251,15 @@ lista:
 	;
 
 elementos: 
-	elemento_binario COMA elementos
+	elemento_binario COMA  elementos
 	| elemento_binario
 	;
 
 elemento_binario: 
-	CTE_INT
+	CTE_BIN { cant++;printf("INCREMENTOCOSO");}
 	| OP_REST CTE_INT
 	| ID
+	| CTE_INT 
 	;
 
 sumaLosUltimos: 

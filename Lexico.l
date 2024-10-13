@@ -34,6 +34,7 @@ CORA                "["
 CORC                "]"
 DOS_PUNTOS          ":"
 
+CTE_BIN				(0|1)+
 CTE_FLT             (({DIGITO}+{PUNTO}{DIGITO}*)|({DIGITO}*{PUNTO}{DIGITO}+))
 CTE_INT            ({DIGITOSINCERO}{DIGITO}*)|0
 CTE_STR             \"[^"]*\" 
@@ -91,6 +92,7 @@ VALOR_COMENTARIO    "*-"[^-\%\&\|\;\@\#\^\~\$]*"-*"
 {OP_MUL}            {return OP_MUL;}
 
 {CTE_FLT}           {validarFloat(yytext);yylval.sfloat = strdup(yytext);return CTE_FLT;}
+{CTE_BIN}           {return CTE_BIN;}
 {CTE_INT}           {validarEntero(yytext);yylval.snum = strdup(yytext);return CTE_INT;}
 {CTE_STR}           {validarString(yytext);yylval.str = strdup(yytext);return CTE_STR;}
 {ID}                {printf("\nIdentificador: %s\n",yytext);yylval.sid = strdup(yytext);return ID;}

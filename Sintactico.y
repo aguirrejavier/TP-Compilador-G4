@@ -212,7 +212,7 @@ escribir:
 
 condiciones:
 	condicion {ptr_conds = ptr_cond;}
-	|PARA condiciones PARC {ptr_conds = ptr_cond;}
+	|PARA condiciones PARC {}
 	|condicion {apilar(pila_exp, ptr_cond);} OR condicion {ptr_conds = crearNodo("OR",desapilar(pila_exp), ptr_cond);}
 	|condicion {apilar(pila_exp, ptr_cond);} AND condicion {ptr_conds = crearNodo("AND",desapilar(pila_exp), ptr_cond);}
 	;
@@ -293,7 +293,7 @@ sumaLosUltimos:
 	PYC lista_nros PARC { 
 		char *cadena = (char *)malloc(20 * sizeof(char));
 		sprintf(cadena, "%.2f", auxSumaUltimos);
-		ptr_sumaLosUltimos = crearNodo("=",crearHoja($1),crearHoja(cadena));
+		ptr_sumaLosUltimos = crearNodo("=",crearHoja($1),crearHoja("@cant"));
 		ptr_sumaLosUltimos = crearNodo(";",ptr_lista_nros,ptr_sumaLosUltimos);
 		ptr_sumaLosUltimos = crearNodo("SUMULT",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
 		}

@@ -5,13 +5,21 @@ init {
     condicion : Float
 }
 
-a := 15
-leer("PRUEBA")
-b := 7
+*- Ejemplo de asignaciones-*
+a := 5
+b := 10
+c := a + b
 
-y := binaryCount([1,1,1,1,5])
+*- Ejemplo de if -*
+if (a <= b AND c >= b)
+{
+    write("a a b")
+}
 
-si (a+3 > b*c AND y <> x)       
+x := 42 / c
+y := x * 3 + 5
+
+if (b > 0)       
 {
     write("a es mayor que b")
 }
@@ -19,3 +27,16 @@ else
 {
     write("a es menor o igual que b")
 }
+
+*- Ejemplo de ciclo while -*
+while (b > 0)
+{
+    write("b es positivo")
+    b := b - 1
+}
+
+*- Ejemplo binaryCount -*
+y := binaryCount([110,1,0,5,x,1010,-1])
+
+*- Ejemplo sumaLosUltimos -*
+x := sumaLosUltimos(4; [28, 13.5, 4, 5.5, 17, 52]) 

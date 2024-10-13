@@ -13,7 +13,6 @@
 #define DOT_FILE "arbol.dot"
 #define INTERMEDIA_FILE "intermedia.txt"
 
-
 int yystopparser=0;
 FILE  *yyin;
 char *yytext;
@@ -48,6 +47,14 @@ ta_nodo* ptr_leer;
 ta_nodo* ptr_escribir;
 ta_nodo* ptr_comp;
 ta_nodo* ptr_binc;
+ta_nodo* ptr_elementos;
+ta_nodo* ptr_elementos_false;
+ta_nodo* ptr_elementos_true;
+ta_nodo* ptr_elemetos_cuerpo;
+ta_nodo* ptr_elemento_binario;
+ta_nodo* ptr_lista;
+ta_nodo* ptr_while;
+ta_nodo* ptr_while_aux;
 
 char pivot[50];
 int pivote;
@@ -143,7 +150,7 @@ sentencia:
 	leer {ptr_sent = ptr_leer;printf("leer\n");}
 	| escribir {ptr_sent = ptr_escribir;}
 	| if {ptr_sent = ptr_if;printf("sentencia sentencia = if\n");}
-	| while
+	| while {ptr_sent = ptr_while;}
 	| asignacion {ptr_sent = ptr_asig;}
 	| binary_count {ptr_sent = ptr_binc;}
 	| sumaLosUltimos {ptr_sent = ptr_sumaLosUltimos;}
@@ -205,7 +212,7 @@ escribir:
 
 condiciones:
 	condicion {ptr_conds = ptr_cond;}
-	|PARA condiciones PARC
+	|PARA condiciones PARC {ptr_conds = ptr_cond;}
 	|condicion {apilar(pila_exp, ptr_cond);} OR condicion {ptr_conds = crearNodo("OR",desapilar(pila_exp), ptr_cond);}
 	|condicion {apilar(pila_exp, ptr_cond);} AND condicion {ptr_conds = crearNodo("AND",desapilar(pila_exp), ptr_cond);}
 	;
@@ -233,10 +240,8 @@ sin_sino:
 	SI PARA condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearNodo("condicion",NULL,ptr_conds) , ptr_true = crearNodo("cuerpo",ptr_cuerciclo,NULL));printf("sentencia sin_sino\n"); }
 	;
 	
-
-
 while:
-	MIENTRAS PARA condiciones PARC LLAA cuerpo_ciclo LLAC 
+	MIENTRAS PARA condiciones{ptr_while_aux=ptr_conds;} PARC LLAA cuerpo_ciclo LLAC {ptr_while = crearNodo("while",ptr_while_aux,ptr_cuerciclo);}
 	;
 
 asignacion: 
@@ -244,23 +249,37 @@ asignacion:
 	;
 
 binary_count:
-	ID OP_ASIG { cant = 0;} BINARY_COUNT PARA lista PARC {ptr_binc = crearNodo("=",crearHoja($1),crearHoja("cant"));ptr_binc = crearNodo("BINARY_COUNT",NULL,ptr_binc);printf("HOLACUNATO?%d",cant);}
+	ID OP_ASIG { cant = 0;} BINARY_COUNT PARA lista PARC {ptr_binc = crearNodo("=",crearHoja($1),crearHoja("@aux")); ptr_binc = crearNodo("BYNARY_COUNT",ptr_lista,ptr_binc);}
 	;
 
 lista: 
-	CORA elementos CORC 
+	CORA elementos CORC {ptr_lista = ptr_elementos;}
 	;
 
 elementos: 
-	elemento_binario COMA  elementos
-	| elemento_binario
+	elementos COMA elemento_binario{
+		ptr_elemetos_cuerpo = crearNodo("+",crearHoja("@aux"),crearHoja("1"));
+		ptr_elemetos_cuerpo = crearNodo("=",crearHoja("@aux"),ptr_elemetos_cuerpo);
+		ptr_elemetos_cuerpo = crearNodo("IF",crearNodo("==",ptr_elemento_binario,crearHoja("es_binario")),ptr_elemetos_cuerpo);
+		ptr_elementos = crearNodo("sentencia",ptr_elementos,ptr_elemetos_cuerpo);
+	}
+	| elemento_binario { ptr_elementos = crearNodo("==",ptr_elemento_binario,crearHoja("es_binario")); 
+						ptr_elementos_true = crearNodo("=",crearHoja("@aux"),crearHoja("1"));
+						ptr_elementos_true = crearNodo("true",ptr_elementos_true,NULL);
+						ptr_elementos_false = crearNodo("=",crearHoja("@aux"),crearHoja("0"));
+						ptr_elementos_false = crearNodo("false",ptr_elementos_false,NULL);
+						ptr_elemetos_cuerpo = crearNodo("cuerpo",ptr_elementos_true, ptr_elementos_false);
+						ptr_elementos = crearNodo("IF",ptr_elementos,ptr_elemetos_cuerpo); 
+						}
 	;
 
 elemento_binario: 
-	CTE_BIN { cant++;printf("INCREMENTOCOSO");}
-	| OP_REST CTE_INT
-	| ID
-	| CTE_INT 
+	  OP_REST CTE_INT {
+		char lexemaAux[12];
+		sprintf(lexemaAux, "-%s", $2);
+		ptr_elemento_binario = crearHoja(lexemaAux);}
+	| ID {ptr_elemento_binario = crearHoja($1);}
+	| CTE_INT {ptr_elemento_binario = crearHoja($1);}
 	;
 
 sumaLosUltimos: 

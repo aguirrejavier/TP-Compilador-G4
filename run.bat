@@ -6,6 +6,8 @@ gcc.exe lex.yy.c y.tab.c "bin\Lista.c" "bin\arbol.c" "bin\stack.c" -o compilador
 
 compilador.exe prueba.txt
 
+dot -Tpng arbol.dot -o salida.png
+
 @echo off
 del compilador.exe
 del lex.yy.c

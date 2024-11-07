@@ -265,9 +265,7 @@ elementos:
 	}
 	| elemento_binario { ptr_elementos = crearNodo("==",ptr_elemento_binario,crearHoja("es_binario")); 
 						ptr_elementos_true = crearNodo("=",crearHoja("@aux"),crearHoja("1"));
-						ptr_elementos_true = crearNodo("true",ptr_elementos_true,NULL);
 						ptr_elementos_false = crearNodo("=",crearHoja("@aux"),crearHoja("0"));
-						ptr_elementos_false = crearNodo("false",ptr_elementos_false,NULL);
 						ptr_elemetos_cuerpo = crearNodo("cuerpo",ptr_elementos_true, ptr_elementos_false);
 						ptr_elementos = crearNodo("IF",ptr_elementos,ptr_elemetos_cuerpo); 
 						}
@@ -288,14 +286,16 @@ sumaLosUltimos:
 		pivote= atoi($5);
 		printf("PIVOT: %s \n", pivot);
 		printf("PIVOT FLOAT: %d \n", pivote);
-		ptr_sumaLosUltimos_aux = crearNodo("=",crearHoja("PIVOT"),crearHoja(pivot));
+		ptr_sumaLosUltimos_aux = crearNodo("=",crearHoja("@PIVOT"),crearHoja(pivot));
+		ptr_sumaLosUltimos = crearNodo("=",crearHoja("@cant"),crearHoja("0"));
+		ptr_sumaLosUltimos_aux = crearNodo(";",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
 	} 
 	PYC lista_nros PARC { 
-		char *cadena = (char *)malloc(20 * sizeof(char));
-		sprintf(cadena, "%.2f", auxSumaUltimos);
-		ptr_sumaLosUltimos = crearNodo("=",crearHoja($1),crearHoja("@cant"));
-		ptr_sumaLosUltimos = crearNodo(";",ptr_lista_nros,ptr_sumaLosUltimos);
-		ptr_sumaLosUltimos = crearNodo("SUMULT",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
+				char *cadena = (char *)malloc(20 * sizeof(char));
+				sprintf(cadena, "%.2f", auxSumaUltimos);
+				ptr_sumaLosUltimos = crearNodo("=",crearHoja($1),crearHoja("@cant"));
+				ptr_sumaLosUltimos = crearNodo(";",ptr_lista_nros,ptr_sumaLosUltimos);
+				ptr_sumaLosUltimos = crearNodo("SUMULT",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
 		}
 	;
 
@@ -314,7 +314,7 @@ elementos_nros:
 		if(contSumaUltimos >= pivote) { auxSumaUltimos = auxSumaUltimos + aux; }
 		ptr_elementos_nros_aux = crearNodo("+",crearHoja("@cant"),ptr_cte_admitida);
 		ptr_elementos_nros_aux = crearNodo("=",crearHoja("@cant"),ptr_elementos_nros_aux);
-		ptr_elementos_nros_aux = crearNodo("IF",crearNodo(">=",crearHoja("@cont"),crearHoja(pivot)),ptr_elementos_nros_aux);
+		ptr_elementos_nros_aux = crearNodo("IF",crearNodo(">=",crearHoja("@cont"),crearHoja("@PIVOT")),ptr_elementos_nros_aux);
 		ptr_elementos_nros_aux2 = crearNodo("+",crearHoja("@cont"),crearHoja("1"));
 		ptr_elementos_nros_aux2 = crearNodo("=",crearHoja("@cont"),ptr_elementos_nros_aux2);
 		ptr_elementos_nros_aux = crearNodo("suma_si",ptr_elementos_nros_aux2,ptr_elementos_nros_aux);
@@ -325,7 +325,7 @@ elementos_nros:
 		ptr_elementos_nros = crearNodo("=",crearHoja("@cont"),crearHoja("1"));
 		ptr_elementos_nros_aux = crearNodo("+",crearHoja("@cant"),ptr_cte_admitida);
 		ptr_elementos_nros_aux = crearNodo("=",crearHoja("@cant"),ptr_elementos_nros_aux);
-		ptr_elementos_nros_aux = crearNodo("IF",crearNodo(">=",crearHoja("@cont"),crearHoja(pivot)),ptr_elementos_nros_aux);
+		ptr_elementos_nros_aux = crearNodo("IF",crearNodo(">=",crearHoja("@cont"),crearHoja("@PIVOT")),ptr_elementos_nros_aux);
 		ptr_elementos_nros = crearNodo("suma_si",ptr_elementos_nros,ptr_elementos_nros_aux);
 		contSumaUltimos = 1;
 	}

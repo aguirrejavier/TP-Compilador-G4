@@ -428,7 +428,7 @@ void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 
 	generarDataAsm(f_asm);
 
-	fprintf(f_asm, "\n\n.CODE\n\nmov AX,@DATA    ; Inicializa el segmento de datos\nmov DS,AX\nmov es,ax ;\n\n");
+	fprintf(f_asm, "\n\n.CODE\n\nSTART:\nmov AX,@DATA    ; Inicializa el segmento de datos\nmov DS,AX\nmov es,ax ;\n\n");
 
 	while(fgets(Linea, sizeof(Linea), f_temp))
 	{
@@ -438,7 +438,7 @@ void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	fclose(f_temp);
 	remove("Temp.asm");
 
-	fprintf(f_asm, "\n\n\nmov ax,4c00h	; Indica que debe finalizar la ejecución\nint 21h\n\nEnd\n");
+	fprintf(f_asm, "\n\n\nmov ax,4c00h	; Indica que debe finalizar la ejecución\nint 21h\n\nEnd START\n");
 	fclose(f_asm);
 }
 void generarDataAsm(FILE* f){
@@ -454,9 +454,16 @@ void generarDataAsm(FILE* f){
         }
         else if (!strncmp(lex.nombre, "_", 1)) {
 				if(strcmp(lex.longitud, "") != 0)
-            		fprintf(f, "%-40s%-30s%-30s,'$', %s dup (?)\n", lex.nombre, "db", lex.valor, lex.longitud);
-				else
-                	fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", lex.valor);
+				{
+					replace_char(lex.nombre,'.','_');
+					replace_char(lex.nombre,' ','_');
+					fprintf(f, "%-40s%-30s\"%s\",'$', %s dup (?)\n", lex.nombre, "db", lex.valor, lex.longitud);
+				}
+				else{
+					replace_char(lex.nombre,'.','_');
+					fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", lex.valor);
+				}
+                	
         }
         else if (strncmp(lex.nombre, "", 1)) {
             fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", "?");
@@ -464,6 +471,7 @@ void generarDataAsm(FILE* f){
         nodoActual = nodoActual->siguiente;
     }
 }
+
 int main(int argc, char *argv[])
 {
 	crearListaLexemas(&tablaSimbolos);

@@ -12,7 +12,9 @@
 #define SYMBOL_TABLE "symbol-table.txt"
 #define DOT_FILE "arbol.dot"
 #define INTERMEDIA_FILE "intermedia.txt"
-
+#define MAX_ID_COUNT 100
+char *identificadores[MAX_ID_COUNT];
+int contador = 0;
 int yystopparser=0;
 FILE  *yyin;
 char *yytext;
@@ -63,7 +65,7 @@ float auxSumaUltimos=0;
 int contSumaUltimos;
 
 t_pila* pila_exp;
-
+char* tipoDatoActual = "Int";
 typedef enum {
     LEXEMA_ID,
     LEXEMA_NUM,
@@ -73,7 +75,7 @@ typedef enum {
 int yyerror();
 int yylex();
 void guardarEnArchivo();
-void agregarLexema(const char *simboloNombre, TipoLexema tipo);
+void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoDato);
 
 
 %}
@@ -126,9 +128,9 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo);
 %token SINO
 %token ESCRIBIR
 %token LEER
-%token V_FLOAT
-%token V_INT  
-%token V_STRING  
+%token <str> V_FLOAT
+%token <str> V_INT  
+%token <str> V_STRING  
 %token BINARY_COUNT
 %token SUMAR_ULTIMOS
 
@@ -167,18 +169,26 @@ lineas:
 	;
 
 linea:
-     identificadores DOS_PUNTOS tipodeDato
+     identificadores DOS_PUNTOS tipodeDato{
+		int i;
+		for (i = 0; i < contador; i++) {
+            agregarLexema(identificadores[i], LEXEMA_ID, tipoDatoActual);
+        }
+        contador = 0;
+	 }
 	;
 
 identificadores:
-    ID {agregarLexema(yytext,LEXEMA_ID);}
-    |identificadores COMA ID {agregarLexema(yytext,LEXEMA_ID);}
+    ID {identificadores[contador] = strdup(yytext);
+        contador++;}
+    |identificadores COMA ID {identificadores[contador] = strdup(yytext);
+        contador++;}
 	;
 	
 tipodeDato:
-	V_INT
-	| V_FLOAT
-	| V_STRING
+	V_INT {tipoDatoActual = "Int";}
+    | V_FLOAT	{tipoDatoActual = "Float";}
+    | V_STRING	{tipoDatoActual = "String";}
 	;
 
 expresion:
@@ -195,10 +205,10 @@ termino:
 
 factor:
 	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n");}
-	| CTE_BIN {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
-    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
-	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM);ptr_fact = crearHoja($1); printf("    CTE_FLT es Factor\n");}
-	| CTE_STR {agregarLexema(yytext,LEXEMA_STR);ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}
+	| CTE_BIN {agregarLexema(yytext,LEXEMA_NUM,"");ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
+    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM,"");ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
+	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM,"");ptr_fact = crearHoja($1); printf("    CTE_FLT es Factor\n");}
+	| CTE_STR {agregarLexema(yytext,LEXEMA_STR,"");ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}
     ;
 
 leer: 
@@ -355,7 +365,7 @@ void guardarEnArchivo(){
     }
     fclose(file);
 }
-void agregarLexema(const char *simboloNombre, TipoLexema tipo) {
+void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoDato) {
     t_lexema lex;
     char nombre[100] = "_";
     char valor[100];
@@ -394,7 +404,7 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo) {
         strcpy(lex.nombre, nombre);
         strcpy(lex.valor, tipo == LEXEMA_ID ? "" : valor);
         strcpy(lex.longitud, tipo == LEXEMA_STR ? strLongitud : "");
-		strcpy(lex.tipoDato, ""); 
+		strcpy(lex.tipoDato, tipoDato); 
         insertarLexemaEnLista(&tablaSimbolos, lex);
     }
 }

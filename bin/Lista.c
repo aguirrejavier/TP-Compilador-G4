@@ -2,6 +2,7 @@
 
 void crearListaLexemas(Lista *lista) {
     lista->cabeza = NULL;
+    lista->size = 0;
 }
 int listaVacia(Lista *lista) {
     return lista->cabeza == NULL;
@@ -25,6 +26,7 @@ int insertarLexemaEnLista(Lista *lista, t_lexema nuevoDato){
         }
         actual->siguiente = nuevoNodo;
     }
+    lista->size++;
     return TODO_OK;
 }    
 int buscarLexemaEnLista(Lista *lista, t_lexema datoBuscado){
@@ -79,7 +81,7 @@ int eliminarLexemaLista(Lista *lista, const char *nombre) {
         anterior = actual;
         actual = actual->siguiente;
     }
-
+    lista->size--;
     return 0;
 }
 int sacarLexemaLista(Lista *lista, t_lexema *lex) {
@@ -99,4 +101,39 @@ int sacarLexemaLista(Lista *lista, t_lexema *lex) {
     free(aux);
 
     return TODO_OK; 
+}
+t_lexema copiarLexema(t_lexema original) {
+    t_lexema copia;
+    strcpy(copia.nombre, original.nombre);
+    strcpy(copia.tipoDato, original.tipoDato);
+    strcpy(copia.valor, original.valor);
+    strcpy(copia.longitud, original.longitud);
+    return copia;
+}
+
+void copiarLista(Lista *origen, Lista *destino) {
+    t_nodo *nodoActual = origen->cabeza;
+    t_nodo *nodoNuevo = NULL;
+    t_nodo *nodoAnterior = NULL;
+
+    destino->cabeza = NULL;
+
+    while (nodoActual != NULL) {
+        nodoNuevo = (t_nodo*)malloc(sizeof(t_nodo));
+        if (nodoNuevo == NULL) {
+            printf("Error al asignar memoria para el nuevo nodo.\n");
+            return;
+        }
+        nodoNuevo->dato = copiarLexema(nodoActual->dato);
+        nodoNuevo->siguiente = NULL;
+
+        if (destino->cabeza == NULL) {
+            destino->cabeza = nodoNuevo; 
+        } else {
+            nodoAnterior->siguiente = nodoNuevo; 
+        }
+
+        nodoAnterior = nodoNuevo;
+        nodoActual = nodoActual->siguiente;
+    }
 }

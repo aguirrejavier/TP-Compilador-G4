@@ -12,6 +12,8 @@
 #define SYMBOL_TABLE "symbol-table.txt"
 #define DOT_FILE "arbol.dot"
 #define INTERMEDIA_FILE "intermedia.txt"
+#define ASSEMBLER_FILE "Final.asm"
+
 #define MAX_ID_COUNT 100
 char *identificadores[MAX_ID_COUNT];
 int contador = 0;
@@ -22,6 +24,7 @@ char *yytext;
 Lista tablaSimbolos;
 FILE  *file_dot;
 FILE  *file_intermedia;
+FILE  *f_asm;
 
 ta_nodo* ptr_progr;
 ta_nodo* ptr_exp;
@@ -75,8 +78,9 @@ typedef enum {
 int yyerror();
 int yylex();
 void guardarEnArchivo();
-void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoDato);
-
+void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato);
+void generarCodigoAssembler(t_arbol *pa, FILE *f, Lista ts);
+void generarDataAsm(FILE* f);
 
 %}
 
@@ -136,7 +140,7 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoD
 
 %%
 programa:  	   
-	declaracion cuerpo {ptr_progr = crearNodo("programa",NULL,ptr_cuer);recorrerInOrder(&ptr_progr, file_intermedia);printf(" FIN\n");}
+	declaracion cuerpo {ptr_progr = crearNodo("programa",NULL,ptr_cuer);recorrerInOrder(&ptr_progr, file_intermedia);printf(" FIN\n");generarCodigoAssembler(&ptr_progr, f_asm, tablaSimbolos);}
 	;
 cuerpo:
 	sentencia {ptr_cuer = ptr_sent;}
@@ -351,23 +355,25 @@ void guardarEnArchivo(){
 
     FILE *file = fopen(SYMBOL_TABLE, "w+");
     t_lexema lexemaRecuperado;
-
+	Lista tablaSimbolosCopia;
+	tablaSimbolosCopia.cabeza = NULL;
+	copiarLista(&tablaSimbolos, &tablaSimbolosCopia);
    	if (file == NULL) {
         perror("Error al abrir el archivo");
         exit(1);
     }
 
     fprintf(file,"%-40s || %-10s || %-50s || %-10s\n","NOMBRE","TIPODATO","VALOR","LONGITUD");
-    while( !listaVacia(&tablaSimbolos) )
+    while( !listaVacia(&tablaSimbolosCopia) )
     {
-        sacarLexemaLista(&tablaSimbolos, &lexemaRecuperado);
+        sacarLexemaLista(&tablaSimbolosCopia, &lexemaRecuperado);
         fprintf(file, "%-40s || %-10s || %-50s || %-10s\n", lexemaRecuperado.nombre, lexemaRecuperado.tipoDato, lexemaRecuperado.valor, lexemaRecuperado.longitud );
     }
     fclose(file);
 }
-void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoDato) {
+void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato) {
     t_lexema lex;
-    char nombre[100] = "_";
+    char nombre[100] = "";
     char valor[100];
     char strLongitud[10] = "";
     int longitud;
@@ -378,11 +384,13 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoD
             break;
 
         case LEXEMA_NUM:
+			strcat(nombre, "_");
             strcat(nombre, simboloNombre);
             strcpy(valor, simboloNombre);
             break;
 
         case LEXEMA_STR: {
+			strcat(nombre, "_");
             int i = 0, j = 0, ocurrencias = 0;
             while (ocurrencias < 2 && simboloNombre[i] != '\0') {
                 if (simboloNombre[i] != '"') {
@@ -396,6 +404,7 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoD
             strcat(nombre, valor);
             longitud = strlen(valor);
             sprintf(strLongitud, "%d", longitud);
+			
             break;
         }
     }
@@ -408,7 +417,53 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, const char *tipoD
         insertarLexemaEnLista(&tablaSimbolos, lex);
     }
 }
+void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
+	char Linea[300];
+	FILE *f_temp = fopen("Temp.asm", "wt");
+	//inOrderAssembler(pa, f_temp);
+	fclose(f_temp);
+	f_temp = fopen("Temp.asm", "rt");
 
+	fprintf(f_asm, "include macros2.asm\ninclude number.asm\n.MODEL LARGE	; Modelo de Memoria\n.386	        ; Tipo de Procesador\n.STACK 200h		; Bytes en el Stack\n\n.DATA \n\n");
+
+	generarDataAsm(f_asm);
+
+	fprintf(f_asm, "\n\n.CODE\n\nmov AX,@DATA    ; Inicializa el segmento de datos\nmov DS,AX\nmov es,ax ;\n\n");
+
+	while(fgets(Linea, sizeof(Linea), f_temp))
+	{
+		fprintf(f_asm, Linea);
+	}
+
+	fclose(f_temp);
+	remove("Temp.asm");
+
+	fprintf(f_asm, "\n\n\nmov ax,4c00h	; Indica que debe finalizar la ejecución\nint 21h\n\nEnd\n");
+	fclose(f_asm);
+}
+void generarDataAsm(FILE* f){
+	 
+	 t_nodo *nodoActual = tablaSimbolos.cabeza;
+
+    while (nodoActual != NULL) {
+        t_lexema lex = nodoActual->dato;
+
+        if ((!strncmp(lex.nombre, "_", 1)) && strcmp(lex.longitud, "") == 0 && strchr(lex.valor, '.') == NULL) {
+            strcat(lex.valor, ".00");
+            fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", lex.valor);
+        }
+        else if (!strncmp(lex.nombre, "_", 1)) {
+				if(strcmp(lex.longitud, "") != 0)
+            		fprintf(f, "%-40s%-30s%-30s,'$', %s dup (?)\n", lex.nombre, "db", lex.valor, lex.longitud);
+				else
+                	fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", lex.valor);
+        }
+        else if (strncmp(lex.nombre, "", 1)) {
+            fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", "?");
+        }
+        nodoActual = nodoActual->siguiente;
+    }
+}
 int main(int argc, char *argv[])
 {
 	crearListaLexemas(&tablaSimbolos);
@@ -425,6 +480,10 @@ int main(int argc, char *argv[])
 	    printf("\nERROR! No se pudo abrir el archivo intermedia\n");
 	    return 1;
     }
+	if ((f_asm = fopen(ASSEMBLER_FILE, "wt")) == NULL){
+		printf("\nERROR! No se pudo abrir el archivo Final.asm para armar el programa\n");
+		return 1;
+		}
 	pila_exp = crearPila();
     yyparse();
     

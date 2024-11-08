@@ -25,6 +25,7 @@ typedef struct nodo {
 
 typedef struct {
     t_nodo *cabeza;
+    int size;
 } Lista;
 
 // Funciones para manejar la lista
@@ -36,5 +37,7 @@ void eliminarLista(Lista *lista);
 int eliminarLexemaLista(Lista *lista, const char *nombre);
 void mostrarLista(Lista *lista);
 int sacarLexemaLista(Lista *lista, t_lexema *lex);
+t_lexema copiarLexema(t_lexema original);
+void copiarLista(Lista *origen, Lista *destino);
 
 #endif // LISTA_H

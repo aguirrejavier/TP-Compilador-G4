@@ -8,7 +8,8 @@
 void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	char Linea[300];
 	FILE *f_temp = fopen("Temp.asm", "wt");
-	//inOrderAssembler(pa, f_temp);
+	
+    recorrerArbol(pa, f_temp);
 	fclose(f_temp);
 	f_temp = fopen("Temp.asm", "rt");
 
@@ -58,4 +59,8 @@ void generarDataAsm(FILE* f, Lista tsimbol){
         }
         nodoActual = nodoActual->siguiente;
     }
+}
+t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
+    // logica para generar el .CODE
+
 }

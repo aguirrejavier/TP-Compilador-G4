@@ -8,6 +8,7 @@
 #include "bin/Lista.h"
 #include "bin/arbol.h"
 #include "bin/stack.h"
+#include "bin/assembler.h"
 
 #define SYMBOL_TABLE "symbol-table.txt"
 #define DOT_FILE "arbol.dot"
@@ -79,9 +80,6 @@ int yyerror();
 int yylex();
 void guardarEnArchivo();
 void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato);
-void generarCodigoAssembler(t_arbol *pa, FILE *f, Lista ts);
-void generarDataAsm(FILE* f);
-
 %}
 
 %union{
@@ -298,8 +296,6 @@ sumaLosUltimos:
 	ID OP_ASIG SUMAR_ULTIMOS PARA CTE_INT {
 		strcpy(pivot,$5);
 		pivote= atoi($5);
-		printf("PIVOT: %s \n", pivot);
-		printf("PIVOT FLOAT: %d \n", pivote);
 		ptr_sumaLosUltimos_aux = crearNodo("=",crearHoja("@PIVOT"),crearHoja(pivot));
 		ptr_sumaLosUltimos = crearNodo("=",crearHoja("@cant"),crearHoja("0"));
 		ptr_sumaLosUltimos_aux = crearNodo(";",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
@@ -415,60 +411,6 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato) {
         strcpy(lex.longitud, tipo == LEXEMA_STR ? strLongitud : "");
 		strcpy(lex.tipoDato, tipoDato); 
         insertarLexemaEnLista(&tablaSimbolos, lex);
-    }
-}
-void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
-	char Linea[300];
-	FILE *f_temp = fopen("Temp.asm", "wt");
-	//inOrderAssembler(pa, f_temp);
-	fclose(f_temp);
-	f_temp = fopen("Temp.asm", "rt");
-
-	fprintf(f_asm, "include macros2.asm\ninclude number.asm\n.MODEL LARGE	; Modelo de Memoria\n.386	        ; Tipo de Procesador\n.STACK 200h		; Bytes en el Stack\n\n.DATA \n\n");
-
-	generarDataAsm(f_asm);
-
-	fprintf(f_asm, "\n\n.CODE\n\nSTART:\nmov AX,@DATA    ; Inicializa el segmento de datos\nmov DS,AX\nmov es,ax ;\n\n");
-
-	while(fgets(Linea, sizeof(Linea), f_temp))
-	{
-		fprintf(f_asm, Linea);
-	}
-
-	fclose(f_temp);
-	remove("Temp.asm");
-
-	fprintf(f_asm, "\n\n\nmov ax,4c00h	; Indica que debe finalizar la ejecución\nint 21h\n\nEnd START\n");
-	fclose(f_asm);
-}
-void generarDataAsm(FILE* f){
-	 
-	 t_nodo *nodoActual = tablaSimbolos.cabeza;
-
-    while (nodoActual != NULL) {
-        t_lexema lex = nodoActual->dato;
-
-        if ((!strncmp(lex.nombre, "_", 1)) && strcmp(lex.longitud, "") == 0 && strchr(lex.valor, '.') == NULL) {
-            strcat(lex.valor, ".00");
-            fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", lex.valor);
-        }
-        else if (!strncmp(lex.nombre, "_", 1)) {
-				if(strcmp(lex.longitud, "") != 0)
-				{
-					replace_char(lex.nombre,'.','_');
-					replace_char(lex.nombre,' ','_');
-					fprintf(f, "%-40s%-30s\"%s\",'$', %s dup (?)\n", lex.nombre, "db", lex.valor, lex.longitud);
-				}
-				else{
-					replace_char(lex.nombre,'.','_');
-					fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", lex.valor);
-				}
-                	
-        }
-        else if (strncmp(lex.nombre, "", 1)) {
-            fprintf(f, "%-40s%-30s%-30s\n", lex.nombre, "dd", "?");
-        }
-        nodoActual = nodoActual->siguiente;
     }
 }
 

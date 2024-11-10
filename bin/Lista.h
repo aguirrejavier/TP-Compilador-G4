@@ -28,6 +28,12 @@ typedef struct {
     int size;
 } Lista;
 
+typedef enum {
+    LEXEMA_ID,
+    LEXEMA_NUM,
+    LEXEMA_STR
+} TipoLexema;
+
 // Funciones para manejar la lista
 void crearListaLexemas(Lista *lista);
 int listaVacia(Lista *lista);
@@ -39,5 +45,6 @@ void mostrarLista(Lista *lista);
 int sacarLexemaLista(Lista *lista, t_lexema *lex);
 t_lexema copiarLexema(t_lexema original);
 void copiarLista(Lista *origen, Lista *destino);
+void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, Lista *lista);
 
 #endif // LISTA_H

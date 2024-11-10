@@ -70,16 +70,11 @@ int contSumaUltimos;
 
 t_pila* pila_exp;
 char* tipoDatoActual = "Int";
-typedef enum {
-    LEXEMA_ID,
-    LEXEMA_NUM,
-    LEXEMA_STR
-} TipoLexema;
+
 
 int yyerror();
 int yylex();
 void guardarEnArchivo();
-void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato);
 %}
 
 %union{
@@ -174,7 +169,7 @@ linea:
      identificadores DOS_PUNTOS tipodeDato{
 		int i;
 		for (i = 0; i < contador; i++) {
-            agregarLexema(identificadores[i], LEXEMA_ID, tipoDatoActual);
+            agregarLexema(identificadores[i], LEXEMA_ID, tipoDatoActual,&tablaSimbolos);
         }
         contador = 0;
 	 }
@@ -207,10 +202,10 @@ termino:
 
 factor:
 	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n");}
-	| CTE_BIN {agregarLexema(yytext,LEXEMA_NUM,"");ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
-    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM,"");ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
-	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM,"");ptr_fact = crearHoja($1); printf("    CTE_FLT es Factor\n");}
-	| CTE_STR {agregarLexema(yytext,LEXEMA_STR,"");ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}
+	| CTE_BIN {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
+    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
+	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_FLT es Factor\n");}
+	| CTE_STR {agregarLexema(yytext,LEXEMA_STR,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}
     ;
 
 leer: 
@@ -257,11 +252,11 @@ while:
 	;
 
 asignacion: 
-	ID OP_ASIG condiciones {ptr_asig = crearNodo("=",crearHoja($1),ptr_conds);}
+	ID OP_ASIG condiciones {ptr_asig = crearNodo(":=",crearHoja($1),ptr_conds);}
 	;
 
 binary_count:
-	ID OP_ASIG { cant = 0;} BINARY_COUNT PARA lista PARC {ptr_binc = crearNodo("=",crearHoja($1),crearHoja("@aux")); ptr_binc = crearNodo("BYNARY_COUNT",ptr_lista,ptr_binc);}
+	ID OP_ASIG { cant = 0;} BINARY_COUNT PARA lista PARC {ptr_binc = crearNodo(":=",crearHoja($1),crearHoja("@aux")); ptr_binc = crearNodo("BYNARY_COUNT",ptr_lista,ptr_binc);}
 	;
 
 lista: 
@@ -271,13 +266,13 @@ lista:
 elementos: 
 	elementos COMA elemento_binario{
 		ptr_elemetos_cuerpo = crearNodo("+",crearHoja("@aux"),crearHoja("1"));
-		ptr_elemetos_cuerpo = crearNodo("=",crearHoja("@aux"),ptr_elemetos_cuerpo);
+		ptr_elemetos_cuerpo = crearNodo(":=",crearHoja("@aux"),ptr_elemetos_cuerpo);
 		ptr_elemetos_cuerpo = crearNodo("IF",crearNodo("==",ptr_elemento_binario,crearHoja("es_binario")),ptr_elemetos_cuerpo);
 		ptr_elementos = crearNodo("sentencia",ptr_elementos,ptr_elemetos_cuerpo);
 	}
 	| elemento_binario { ptr_elementos = crearNodo("==",ptr_elemento_binario,crearHoja("es_binario")); 
-						ptr_elementos_true = crearNodo("=",crearHoja("@aux"),crearHoja("1"));
-						ptr_elementos_false = crearNodo("=",crearHoja("@aux"),crearHoja("0"));
+						ptr_elementos_true = crearNodo(":=",crearHoja("@aux"),crearHoja("1"));
+						ptr_elementos_false = crearNodo(":=",crearHoja("@aux"),crearHoja("0"));
 						ptr_elemetos_cuerpo = crearNodo("cuerpo",ptr_elementos_true, ptr_elementos_false);
 						ptr_elementos = crearNodo("IF",ptr_elementos,ptr_elemetos_cuerpo); 
 						}
@@ -296,14 +291,14 @@ sumaLosUltimos:
 	ID OP_ASIG SUMAR_ULTIMOS PARA CTE_INT {
 		strcpy(pivot,$5);
 		pivote= atoi($5);
-		ptr_sumaLosUltimos_aux = crearNodo("=",crearHoja("@PIVOT"),crearHoja(pivot));
-		ptr_sumaLosUltimos = crearNodo("=",crearHoja("@cant"),crearHoja("0"));
+		ptr_sumaLosUltimos_aux = crearNodo(":=",crearHoja("@PIVOT"),crearHoja(pivot));
+		ptr_sumaLosUltimos = crearNodo(":=",crearHoja("@cant"),crearHoja("0"));
 		ptr_sumaLosUltimos_aux = crearNodo(";",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
 	} 
 	PYC lista_nros PARC { 
 				char *cadena = (char *)malloc(20 * sizeof(char));
 				sprintf(cadena, "%.2f", auxSumaUltimos);
-				ptr_sumaLosUltimos = crearNodo("=",crearHoja($1),crearHoja("@cant"));
+				ptr_sumaLosUltimos = crearNodo(":=",crearHoja($1),crearHoja("@cant"));
 				ptr_sumaLosUltimos = crearNodo(";",ptr_lista_nros,ptr_sumaLosUltimos);
 				ptr_sumaLosUltimos = crearNodo("SUMULT",ptr_sumaLosUltimos_aux,ptr_sumaLosUltimos);
 		}
@@ -366,52 +361,6 @@ void guardarEnArchivo(){
         fprintf(file, "%-40s || %-10s || %-50s || %-10s\n", lexemaRecuperado.nombre, lexemaRecuperado.tipoDato, lexemaRecuperado.valor, lexemaRecuperado.longitud );
     }
     fclose(file);
-}
-void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato) {
-    t_lexema lex;
-    char nombre[100] = "";
-    char valor[100];
-    char strLongitud[10] = "";
-    int longitud;
-
-    switch (tipo) {
-        case LEXEMA_ID:
-            strcat(nombre, simboloNombre);
-            break;
-
-        case LEXEMA_NUM:
-			strcat(nombre, "_");
-            strcat(nombre, simboloNombre);
-            strcpy(valor, simboloNombre);
-            break;
-
-        case LEXEMA_STR: {
-			strcat(nombre, "_");
-            int i = 0, j = 0, ocurrencias = 0;
-            while (ocurrencias < 2 && simboloNombre[i] != '\0') {
-                if (simboloNombre[i] != '"') {
-                    valor[j++] = simboloNombre[i];
-                } else {
-                    ocurrencias++;
-                }
-                i++;
-            }
-            valor[j] = '\0';
-            strcat(nombre, valor);
-            longitud = strlen(valor);
-            sprintf(strLongitud, "%d", longitud);
-			
-            break;
-        }
-    }
-	strcpy(lex.nombre, nombre);
-    if (buscarLexemaEnLista(&tablaSimbolos, lex) == 0) {
-        strcpy(lex.nombre, nombre);
-        strcpy(lex.valor, tipo == LEXEMA_ID ? "" : valor);
-        strcpy(lex.longitud, tipo == LEXEMA_STR ? strLongitud : "");
-		strcpy(lex.tipoDato, tipoDato); 
-        insertarLexemaEnLista(&tablaSimbolos, lex);
-    }
 }
 
 int main(int argc, char *argv[])

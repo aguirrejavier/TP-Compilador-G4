@@ -137,3 +137,49 @@ void copiarLista(Lista *origen, Lista *destino) {
         nodoActual = nodoActual->siguiente;
     }
 }
+void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, Lista *tablaSimbolos) {
+    t_lexema lex;
+    char nombre[100] = "";
+    char valor[100];
+    char strLongitud[10] = "";
+    int longitud;
+
+    switch (tipo) {
+        case LEXEMA_ID:
+            strcat(nombre, simboloNombre);
+            break;
+
+        case LEXEMA_NUM:
+			strcat(nombre, "_");
+            strcat(nombre, simboloNombre);
+            strcpy(valor, simboloNombre);
+            break;
+
+        case LEXEMA_STR: {
+			strcat(nombre, "_");
+            int i = 0, j = 0, ocurrencias = 0;
+            while (ocurrencias < 2 && simboloNombre[i] != '\0') {
+                if (simboloNombre[i] != '"') {
+                    valor[j++] = simboloNombre[i];
+                } else {
+                    ocurrencias++;
+                }
+                i++;
+            }
+            valor[j] = '\0';
+            strcat(nombre, valor);
+            longitud = strlen(valor);
+            sprintf(strLongitud, "%d", longitud);
+			
+            break;
+        }
+    }
+	strcpy(lex.nombre, nombre);
+    if (buscarLexemaEnLista(tablaSimbolos, lex) == 0) {
+        strcpy(lex.nombre, nombre);
+        strcpy(lex.valor, tipo == LEXEMA_ID ? "" : valor);
+        strcpy(lex.longitud, tipo == LEXEMA_STR ? strLongitud : "");
+		strcpy(lex.tipoDato, tipoDato); 
+        insertarLexemaEnLista(tablaSimbolos, lex);
+    }
+}

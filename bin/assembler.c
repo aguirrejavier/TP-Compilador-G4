@@ -4,7 +4,7 @@
 #include "assembler.h"
 #include "arbol.h"
 #include "Lista.h"
-
+int contAux = 0;
 void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	char Linea[300];
 	FILE *f_temp = fopen("Temp.asm", "wt");
@@ -60,7 +60,64 @@ void generarDataAsm(FILE* f, Lista tsimbol){
         nodoActual = nodoActual->siguiente;
     }
 }
-t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
-    // logica para generar el .CODE
+int esHoja(t_arbol* pa){
+    if(!*pa)
+        return 0;
+ 
+    return (!(*pa)->hijoIzquierdo) && (!(*pa)->hijoDerecho);
+}
 
+t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
+    if (!*pa) return NULL;
+
+    recorrerArbol(&(*pa)->hijoIzquierdo, f_temp);
+
+    if (esHoja(&(*pa)->hijoIzquierdo) && (esHoja(&(*pa)->hijoDerecho) || (*pa)->hijoDerecho == NULL)) {
+        if (strcmp((*pa)->descripcion, "sentencia") != 0 ) {
+            traduccionAssembler(pa, f_temp);
+        }
+        return pa;
+    }
+
+    recorrerArbol(&(*pa)->hijoDerecho, f_temp);
+
+    return NULL;
+}
+void traduccionAssembler(t_arbol* pa, FILE* f) {
+    if (!*pa) return;
+    char cadena[50] = "";
+
+    if (strcmp((*pa)->descripcion, "+") == 0 || strcmp((*pa)->descripcion, "-") == 0 || 
+        strcmp((*pa)->descripcion, "*") == 0 || strcmp((*pa)->descripcion, "/") == 0 || 
+        strcmp((*pa)->descripcion, ":=") == 0) {
+
+        if (strcmp((*pa)->descripcion, ":=") != 0) {
+            fprintf(f, "FLD %s\n", ((*pa)->hijoIzquierdo)->descripcion);
+        }
+        fprintf(f, "FLD %s\n", ((*pa)->hijoDerecho)->descripcion);
+    
+        if (strcmp((*pa)->descripcion, "+") == 0)
+            fprintf(f, "FADD\n");
+        else if (strcmp((*pa)->descripcion, "-") == 0)
+            fprintf(f, "FSUB\n");
+        else if (strcmp((*pa)->descripcion, "*") == 0)
+            fprintf(f, "FMUL\n");
+        else if (strcmp((*pa)->descripcion, "/") == 0)
+            fprintf(f, "FDIV\n");
+
+        if (strcmp((*pa)->descripcion, ":=") == 0) {
+            fprintf(f, "FSTP %s\n", (*pa)->hijoIzquierdo->descripcion); 
+        } else {
+            sprintf(cadena, "@Aux%d", ++contAux);
+            fprintf(f, "FSTP %s\n", cadena);
+            strcpy((*pa)->descripcion, cadena);
+        }
+
+        free((*pa)->hijoIzquierdo);
+        (*pa)->hijoIzquierdo = NULL;
+        free((*pa)->hijoDerecho);
+        (*pa)->hijoDerecho = NULL;
+
+        fprintf(f, "FFREE\n");
+    }
 }

@@ -9,7 +9,7 @@ void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	char Linea[300];
 	FILE *f_temp = fopen("Temp.asm", "wt");
 	
-    recorrerArbol(pa, f_temp,&ts);
+    recorrerArbol(pa, f_temp); //POST ORDEN
 	fclose(f_temp);
 	f_temp = fopen("Temp.asm", "rt");
 
@@ -27,7 +27,7 @@ void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	fclose(f_temp);
 	remove("Temp.asm");
 
-	fprintf(f_asm, "\n\n\nmov ax,4c00h	; Indica que debe finalizar la ejecución\nint 21h\n\nEnd START\n");
+	fprintf(f_asm, "\n\n\nmov ax,4c00h	; Indica que debe finalizar la ejecuci贸n\nint 21h\n\nEnd START\n");
 	fclose(f_asm);
 }
 void generarDataAsm(FILE* f, Lista tsimbol){
@@ -67,63 +67,95 @@ int esHoja(t_arbol* pa){
     return (!(*pa)->hijoIzquierdo) && (!(*pa)->hijoDerecho);
 }
 
-t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp, Lista *tsimbol){
+t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
     if (!*pa) return NULL;
 
-    recorrerArbol(&(*pa)->hijoIzquierdo, f_temp, tsimbol);
+    recorrerArbol(&(*pa)->hijoIzquierdo, f_temp);
 
     if (esHoja(&(*pa)->hijoIzquierdo) && (esHoja(&(*pa)->hijoDerecho) || (*pa)->hijoDerecho == NULL)) {
         if (strcmp((*pa)->descripcion, "sentencia") != 0 ) {
-            traduccionAssembler(pa, f_temp, tsimbol);
+            traduccionAssembler(pa, f_temp);
         }
         return pa;
     }
-    recorrerArbol(&(*pa)->hijoDerecho, f_temp, tsimbol);
+
+    recorrerArbol(&(*pa)->hijoDerecho, f_temp);
+
     return NULL;
 }
-
-void traduccionAssembler(t_arbol* pa, FILE* f,  Lista* tsimbol) {
+void traduccionAssembler(t_arbol* pa, FILE* f) {
     if (!*pa) return;
     char cadena[50] = "";
+	
+	//COMENTARIO GENERAL
+	// *TODO funciones especiales
+	// *puede que por el trabajo en pila tengamos que hacer intercambios de registros
+	// *esta logica seria suficiente para manejar todo lo que venga de la intermedia
+	if((*pa)->izq == NULL && (*pa)->der == NULL)
+		fprintf(f, "FLD %s\n", (*pa)->descripcion); 
+	//hace un FLD del nodo (este seria para los enteros y constantes)
+
+    if(strcmp((*pa)->descripcion, "escribir") == 0)
+	//FLD variable/cte
+	//FSTP mensaje
+	//mov dx, offset mensaje  ; Cargar la direcci贸n de la cadena a imprimir
+	//mov ah, 09h             ; Funci贸n 09h de DOS para mostrar cadenas
+	//int 21h                 ; Llamar a la interrupci贸n 21h de DOS
+	if(strcmp((*pa)->descripcion, "leer") == 0)
+		fprintf(f, "FLD %s\n", (*pa)->hijoDerecho->descripcion); 
+	
+	if(strcmp((*pa)->descripcion, "while") == 0)
+	//agrega un if preguntando si el tope de pila es 1 o 0, deberia tener un JZ a la etiqueta donde comienza (hago un POP de PILAETIQUETA)
+	if(strcmp((*pa)->descripcion, "if") == 0)
+	//no haria nada
+	if(strcmp((*pa)->descripcion, "condicion") == 0)
+	//usaria este nodo dummy para apilar en PILAETIQUETA el valor que tenga en AUXETIQUETA 
+	if(strcmp((*pa)->descripcion, "cuerpo") == 0)
+    //en esta se hace toda la logica del if o del while, usando un JNE con 1 y 0 contra el tope de pila , tambien podriamos usar un JZ en estos casos (salto si no es 0) 
+	//desapilo PILAETIQUETA
+	//en el if no lo uso para nada
+	//en el while la utilizo para volver al inicio del ciclo
+
+    if (strcmp((*pa)->descripcion, "AND") == 0 || strcmp((*pa)->descripcion, "OR") == 0 )
+    //suma los dos primeros registros de la pila
+    //para AND verifica si es igual a 2
+	//para OR verifica si es mayor o igual a 1
+    //en tope de pila quedaria un unico valor que corresponde al resultado (1 TRUE-0 FALSE)
+
+    if (strcmp((*pa)->descripcion, ">") == 0 || strcmp((*pa)->descripcion, ">=") == 0 || 
+        strcmp((*pa)->descripcion, "<") == 0 || strcmp((*pa)->descripcion, "<=") == 0 || 
+        strcmp((*pa)->descripcion, "<>") == 0 || strcmp((*pa)->descripcion, "==") == 0)
+	//ETIQUETA COMP i
+    //compara los dos primeros registros de la pila (FCMP)
+    //en el caso del TRUE deja en el tope de la pila 1    
+	//en el caso del FALSE deja en el tope de la pila 0
+	//ademas deberia agregarse una etiqueta encima para que pueda volver en el caso del while (pongo esa etiqueta en AUXETIQUETA)
+		fprintf(f, "FCOMP");
+		 if (strcmp((*pa)->descripcion, ">") == 0 )
+				fprintf(f, "JNA");
+				fprintf(f, "FLD 1");
+				fprintf(f, "");
 
     if (strcmp((*pa)->descripcion, "+") == 0 || strcmp((*pa)->descripcion, "-") == 0 || 
         strcmp((*pa)->descripcion, "*") == 0 || strcmp((*pa)->descripcion, "/") == 0 || 
         strcmp((*pa)->descripcion, ":=") == 0) {
-
-        if (strncmp(((*pa)->hijoDerecho)->descripcion, "%s", 2) == 0){
-            fprintf(f, "lea eax, %s\n", ((*pa)->hijoDerecho)->descripcion + 2);
-            fprintf(f, "mov %s, eax\n", ((*pa)->hijoIzquierdo)->descripcion);
-        }else {
-            if (strcmp((*pa)->descripcion, ":=") != 0) {
-                fprintf(f, "FLD %s\n", ((*pa)->hijoIzquierdo)->descripcion);
-            }
-            fprintf(f, "FLD %s\n", ((*pa)->hijoDerecho)->descripcion);
-        
-            if (strcmp((*pa)->descripcion, "+") == 0)
-                fprintf(f, "FADD\n");
-            else if (strcmp((*pa)->descripcion, "-") == 0)
-                fprintf(f, "FSUB\n");
-            else if (strcmp((*pa)->descripcion, "*") == 0)
-                fprintf(f, "FMUL\n");
-            else if (strcmp((*pa)->descripcion, "/") == 0)
-                fprintf(f, "FDIV\n");
-
-            if (strcmp((*pa)->descripcion, ":=") == 0) {
-                
-                fprintf(f, "FSTP %s\n", (*pa)->hijoIzquierdo->descripcion); 
-            } else {
-                sprintf(cadena, "@Aux%d", ++contAux);
-                fprintf(f, "FSTP %s\n", cadena);
-                strcpy((*pa)->descripcion, cadena);
-                agregarLexema(cadena, LEXEMA_ID, "", tsimbol);
-            }
-        } 
-
-        free((*pa)->hijoIzquierdo);
-        (*pa)->hijoIzquierdo = NULL;
-        free((*pa)->hijoDerecho);
-        (*pa)->hijoDerecho = NULL;
-
-        fprintf(f, "FFREE\n");
+			
+		if (strcmp((*pa)->descripcion, "+") == 0)
+			fprintf(f, "FADD"); 
+		if (strcmp((*pa)->descripcion, "-") == 0)
+			fprintf(f, "FSUB"); 
+		if (strcmp((*pa)->descripcion, "*") == 0)
+			fprintf(f, "FMUL"); 
+		if (strcmp((*pa)->descripcion, "/") == 0)
+			fprintf(f, "FDIV"); 
+		
+		//VER ESTO
+		if (strcmp((*pa)->descripcion, ":=") == 0)
+			fprintf(f, "FSTP "); 
+        //operaciones sobre los dos primeros registros de la pila  y asignacion sobre el tope de pila
+        //en todas las operaciones queda el resultado en tope de pila
+        //en el caso de la asignacion queda la pila vacia
+        //(pensando que previamente lo estaba)
+		
     }
 }

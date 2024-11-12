@@ -213,7 +213,7 @@ leer:
 	;
 
 escribir:
-	ESCRIBIR PARA CTE_STR PARC {printf($3); ptr_escribir = crearNodo("escribir",NULL, crearHoja($3));}
+	ESCRIBIR PARA CTE_STR PARC {agregarLexema($3,LEXEMA_STR,"",&tablaSimbolos);char resultado[100];formatearConstante($3, resultado,LEXEMA_STR);printf($3); ptr_escribir = crearNodo("escribir",NULL, crearHoja(resultado));}
 	|ESCRIBIR PARA ID PARC {printf($3); ptr_escribir = crearNodo("escribir",NULL, crearHoja($3));}
 	;
 

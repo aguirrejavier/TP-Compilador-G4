@@ -88,10 +88,15 @@ void traduccionAssembler(t_arbol* pa, FILE* f) {
 	// *TODO funciones especiales
 	// *puede que por el trabajo en pila tengamos que hacer intercambios de registros
 	// *esta logica seria suficiente para manejar todo lo que venga de la intermedia
-	if((*pa)->hijoIzquierdo == NULL && (*pa)->hijoDerecho == NULL)
+	if((*pa)->hijoIzquierdo == NULL && (*pa)->hijoDerecho == NULL && strncmp((*pa)->descripcion, "%s", 2) != 0)
 		fprintf(f, "FLD %s\n", (*pa)->descripcion); 
 
-    if(strcmp((*pa)->descripcion, "escribir") == 0){}
+    if(strcmp((*pa)->descripcion, "escribir") == 0){
+        fprintf(f, "mov dx, OFFSET %s\n",((*pa)->hijoDerecho)->descripcion + 2);
+        fprintf(f, "mov ah, 9\n");
+        fprintf(f, "int 21h\n");
+        fprintf(f, "newLine 1\n");
+    }
 	//FLD variable/cte
 	//FSTP mensaje
 	//mov dx, offset mensaje  ; Cargar la direcci贸n de la cadena a imprimir
@@ -147,13 +152,17 @@ void traduccionAssembler(t_arbol* pa, FILE* f) {
 		if (strcmp((*pa)->descripcion, "/") == 0)
 			fprintf(f, "FDIV\n"); 
 		
-		//VER ESTO
-		if (strcmp((*pa)->descripcion, ":=") == 0)
-			fprintf(f, "FSTP %s\n", (*pa)->hijoIzquierdo->descripcion); 
+		if (strcmp((*pa)->descripcion, ":=") == 0){
+            if (strncmp(((*pa)->hijoDerecho)->descripcion, "%s", 2) == 0){
+                fprintf(f, "lea eax, %s\n", ((*pa)->hijoDerecho)->descripcion + 2);
+                fprintf(f, "mov %s, eax\n", ((*pa)->hijoIzquierdo)->descripcion);
+            }else{
+                fprintf(f, "FSTP %s\n", (*pa)->hijoIzquierdo->descripcion); 
+            }
+        }
         //operaciones sobre los dos primeros registros de la pila  y asignacion sobre el tope de pila
         //en todas las operaciones queda el resultado en tope de pila
         //en el caso de la asignacion queda la pila vacia
         //(pensando que previamente lo estaba)
-		
     }
 }

@@ -3,6 +3,6 @@
 
 void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts);
 void generarDataAsm(FILE* f, Lista tsimbol);
-t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp);
+t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp, Lista *tsimbol);
 int esHoja(t_arbol* pa);
-void traduccionAssembler(t_arbol* pa, FILE* f);
+void traduccionAssembler(t_arbol* pa, FILE* f,  Lista* tsimbol);

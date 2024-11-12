@@ -9,7 +9,7 @@ void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	char Linea[300];
 	FILE *f_temp = fopen("Temp.asm", "wt");
 	
-    recorrerArbol(pa, f_temp);
+    recorrerArbol(pa, f_temp,&ts);
 	fclose(f_temp);
 	f_temp = fopen("Temp.asm", "rt");
 
@@ -67,23 +67,22 @@ int esHoja(t_arbol* pa){
     return (!(*pa)->hijoIzquierdo) && (!(*pa)->hijoDerecho);
 }
 
-t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
+t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp, Lista *tsimbol){
     if (!*pa) return NULL;
 
-    recorrerArbol(&(*pa)->hijoIzquierdo, f_temp);
+    recorrerArbol(&(*pa)->hijoIzquierdo, f_temp, tsimbol);
 
     if (esHoja(&(*pa)->hijoIzquierdo) && (esHoja(&(*pa)->hijoDerecho) || (*pa)->hijoDerecho == NULL)) {
         if (strcmp((*pa)->descripcion, "sentencia") != 0 ) {
-            traduccionAssembler(pa, f_temp);
+            traduccionAssembler(pa, f_temp, tsimbol);
         }
         return pa;
     }
-
-    recorrerArbol(&(*pa)->hijoDerecho, f_temp);
-
+    recorrerArbol(&(*pa)->hijoDerecho, f_temp, tsimbol);
     return NULL;
 }
-void traduccionAssembler(t_arbol* pa, FILE* f) {
+
+void traduccionAssembler(t_arbol* pa, FILE* f,  Lista* tsimbol) {
     if (!*pa) return;
     char cadena[50] = "";
 
@@ -91,27 +90,34 @@ void traduccionAssembler(t_arbol* pa, FILE* f) {
         strcmp((*pa)->descripcion, "*") == 0 || strcmp((*pa)->descripcion, "/") == 0 || 
         strcmp((*pa)->descripcion, ":=") == 0) {
 
-        if (strcmp((*pa)->descripcion, ":=") != 0) {
-            fprintf(f, "FLD %s\n", ((*pa)->hijoIzquierdo)->descripcion);
-        }
-        fprintf(f, "FLD %s\n", ((*pa)->hijoDerecho)->descripcion);
-    
-        if (strcmp((*pa)->descripcion, "+") == 0)
-            fprintf(f, "FADD\n");
-        else if (strcmp((*pa)->descripcion, "-") == 0)
-            fprintf(f, "FSUB\n");
-        else if (strcmp((*pa)->descripcion, "*") == 0)
-            fprintf(f, "FMUL\n");
-        else if (strcmp((*pa)->descripcion, "/") == 0)
-            fprintf(f, "FDIV\n");
+        if (strncmp(((*pa)->hijoDerecho)->descripcion, "%s", 2) == 0){
+            fprintf(f, "lea eax, %s\n", ((*pa)->hijoDerecho)->descripcion + 2);
+            fprintf(f, "mov %s, eax\n", ((*pa)->hijoIzquierdo)->descripcion);
+        }else {
+            if (strcmp((*pa)->descripcion, ":=") != 0) {
+                fprintf(f, "FLD %s\n", ((*pa)->hijoIzquierdo)->descripcion);
+            }
+            fprintf(f, "FLD %s\n", ((*pa)->hijoDerecho)->descripcion);
+        
+            if (strcmp((*pa)->descripcion, "+") == 0)
+                fprintf(f, "FADD\n");
+            else if (strcmp((*pa)->descripcion, "-") == 0)
+                fprintf(f, "FSUB\n");
+            else if (strcmp((*pa)->descripcion, "*") == 0)
+                fprintf(f, "FMUL\n");
+            else if (strcmp((*pa)->descripcion, "/") == 0)
+                fprintf(f, "FDIV\n");
 
-        if (strcmp((*pa)->descripcion, ":=") == 0) {
-            fprintf(f, "FSTP %s\n", (*pa)->hijoIzquierdo->descripcion); 
-        } else {
-            sprintf(cadena, "@Aux%d", ++contAux);
-            fprintf(f, "FSTP %s\n", cadena);
-            strcpy((*pa)->descripcion, cadena);
-        }
+            if (strcmp((*pa)->descripcion, ":=") == 0) {
+                
+                fprintf(f, "FSTP %s\n", (*pa)->hijoIzquierdo->descripcion); 
+            } else {
+                sprintf(cadena, "@Aux%d", ++contAux);
+                fprintf(f, "FSTP %s\n", cadena);
+                strcpy((*pa)->descripcion, cadena);
+                agregarLexema(cadena, LEXEMA_ID, "", tsimbol);
+            }
+        } 
 
         free((*pa)->hijoIzquierdo);
         (*pa)->hijoIzquierdo = NULL;

@@ -70,7 +70,7 @@ int contSumaUltimos;
 
 t_pila* pila_exp;
 char* tipoDatoActual = "Int";
-
+void formatearConstante(char *constante, char *resultado, TipoLexema tipo);
 
 int yyerror();
 int yylex();
@@ -133,7 +133,7 @@ void guardarEnArchivo();
 
 %%
 programa:  	   
-	declaracion cuerpo {ptr_progr = crearNodo("programa",NULL,ptr_cuer);recorrerInOrder(&ptr_progr, file_intermedia);printf(" FIN\n");generarCodigoAssembler(&ptr_progr, f_asm, tablaSimbolos);}
+	declaracion cuerpo {ptr_progr = crearNodo("programa",NULL,ptr_cuer);recorrerInOrder(&ptr_progr, file_intermedia);printf(" FIN\n");guardarEnArchivo();generarArchivoDOT(&ptr_progr, file_dot);generarCodigoAssembler(&ptr_progr, f_asm, tablaSimbolos);}
 	;
 cuerpo:
 	sentencia {ptr_cuer = ptr_sent;}
@@ -203,9 +203,9 @@ termino:
 factor:
 	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n");}
 	| CTE_BIN {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
-    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
-	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_FLT es Factor\n");}
-	| CTE_STR {agregarLexema(yytext,LEXEMA_STR,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_STR es Factor\n");}
+    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_NUM);ptr_fact = crearHoja(resultado); printf("    CTE_INT es Factor\n");}
+	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_NUM);ptr_fact = crearHoja(resultado); printf("    CTE_FLT es Factor\n");}
+	| CTE_STR {agregarLexema(yytext,LEXEMA_STR,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_STR);ptr_fact = crearHoja(resultado); printf("    CTE_STR es Factor\n");}
     ;
 
 leer: 
@@ -362,7 +362,24 @@ void guardarEnArchivo(){
     }
     fclose(file);
 }
+void formatearConstante(char *constante, char *resultado, TipoLexema tipo) {
 
+	char temp[100];  
+    int i, j = 1;
+    resultado[0] = '_';
+    for (i = 0; constante[i] != '\0'; i++) {
+        if (constante[i] == '.' || constante[i] == ' ') {
+            resultado[j++] = '_'; 
+        } else if (constante[i] != '\"') {
+            resultado[j++] = constante[i];
+        }
+    }
+    resultado[j] = '\0';
+	if (tipo == LEXEMA_STR) {
+        sprintf(temp, "%%s%s", resultado);
+        strcpy(resultado, temp);
+    }
+}
 int main(int argc, char *argv[])
 {
 	crearListaLexemas(&tablaSimbolos);
@@ -386,10 +403,8 @@ int main(int argc, char *argv[])
 	pila_exp = crearPila();
     yyparse();
     
-	guardarEnArchivo();
 	fclose(yyin);
 	fclose(file_intermedia);
-    generarArchivoDOT(&ptr_progr, file_dot);
     return 0;
 }
 int yyerror(void)

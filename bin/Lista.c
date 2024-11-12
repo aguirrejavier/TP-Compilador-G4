@@ -1,4 +1,5 @@
 #include "Lista.h"
+#include "arbol.h"
 
 void crearListaLexemas(Lista *lista) {
     lista->cabeza = NULL;
@@ -143,7 +144,6 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, L
     char valor[100];
     char strLongitud[10] = "";
     int longitud;
-
     switch (tipo) {
         case LEXEMA_ID:
             strcat(nombre, simboloNombre);
@@ -153,6 +153,9 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, L
 			strcat(nombre, "_");
             strcat(nombre, simboloNombre);
             strcpy(valor, simboloNombre);
+            if (strchr(nombre, '.')) {
+                replace_char(nombre, '.', '_');
+            }
             break;
 
         case LEXEMA_STR: {
@@ -174,6 +177,7 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, L
             break;
         }
     }
+
 	strcpy(lex.nombre, nombre);
     if (buscarLexemaEnLista(tablaSimbolos, lex) == 0) {
         strcpy(lex.nombre, nombre);

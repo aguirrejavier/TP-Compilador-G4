@@ -19,7 +19,7 @@ void apilar(t_pila* pila, const char* dato) {
         fprintf(stderr, "Error al asignar memoria para el nodo.\n");
         exit(EXIT_FAILURE);
     }
-    nuevoNodo->dato = strdup(dato); // Copia la cadena para almacenar en la pila
+    nuevoNodo->dato = strdup(dato);
     nuevoNodo->siguiente = pila->cima;
     pila->cima = nuevoNodo;
 }
@@ -30,7 +30,7 @@ char* desapilar(t_pila* pila) {
         exit(EXIT_FAILURE);
     }
     t_nodoStack* nodoAEliminar = pila->cima;
-    char* dato = nodoAEliminar->dato; // Obtiene la cadena del nodo
+    char* dato = nodoAEliminar->dato; 
     pila->cima = nodoAEliminar->siguiente;
     free(nodoAEliminar);
     return dato;
@@ -41,16 +41,11 @@ int pilaVacia(t_pila* pila) {
 }
 
 void liberarPila(t_pila* pila) {
-    t_nodoStack* nodoActual = pila->cima;
-    while (nodoActual != NULL) {
-        t_nodoStack* nodoAEliminar = nodoActual;
-        nodoActual = nodoActual->siguiente;
-        free(nodoAEliminar->dato);
-        free(nodoAEliminar);
+    while (!pilaVacia(pila)) {
+        char* dato = desapilar(pila); // Desapila y libera cada nodo
+        free(dato); // Libera el contenido del dato
     }
-    pila->cima = NULL;
 }
-
 char* verTope(t_pila* pila) {
     if (pilaVacia(pila)) {
         fprintf(stderr, "Error: Intento de ver el tope de una pila vacía.\n");

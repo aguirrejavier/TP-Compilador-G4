@@ -7,6 +7,9 @@
 #include "stackAsm.h"
 int contAux = 0;
 t_pila* pila_exp;
+void cargarOperando(FILE* f, char* operando);
+void realizarOperacion(FILE* f, t_pila* pila_exp, const char* operacion);
+void vaciar_pila(t_pila* pila);
 
 void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	char Linea[300];
@@ -167,6 +170,7 @@ void traduccionAssembler(t_arbol* pa, FILE* f) {
             }
             fprintf(f, "FSTP %s\n", ((*pa)->hijoIzquierdo)->descripcion);
         }
+        vaciar_pila(pila_exp);
     }
         //operaciones sobre los dos primeros registros de la pila  y asignacion sobre el tope de pila
         //en todas las operaciones queda el resultado en tope de pila
@@ -189,4 +193,11 @@ void realizarOperacion(FILE* f, t_pila* pila_exp, const char* operacion) {
 
     fprintf(f, "%s\n", operacion);
     apilar(pila_exp, "TRUE");
+}
+
+void vaciar_pila(t_pila* pila){
+    while (!pilaVacia(pila)) {
+        char* dato = desapilar(pila);
+        free(dato);
+    }
 }

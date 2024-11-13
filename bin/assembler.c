@@ -167,7 +167,6 @@ void traduccionAssembler(t_arbol* pa, FILE* f) {
             }
             fprintf(f, "FSTP %s\n", ((*pa)->hijoIzquierdo)->descripcion);
         }
-        liberarPila(pila_exp);
     }
         //operaciones sobre los dos primeros registros de la pila  y asignacion sobre el tope de pila
         //en todas las operaciones queda el resultado en tope de pila

@@ -4,11 +4,14 @@
 #include "assembler.h"
 #include "arbol.h"
 #include "Lista.h"
+#include "stackAsm.h"
 int contAux = 0;
+t_pila* pila_exp;
+
 void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	char Linea[300];
 	FILE *f_temp = fopen("Temp.asm", "wt");
-	
+	pila_exp = crearPila();
     recorrerArbol(pa, f_temp); //POST ORDEN
 	fclose(f_temp);
 	f_temp = fopen("Temp.asm", "rt");
@@ -88,8 +91,12 @@ void traduccionAssembler(t_arbol* pa, FILE* f) {
 	// *TODO funciones especiales
 	// *puede que por el trabajo en pila tengamos que hacer intercambios de registros
 	// *esta logica seria suficiente para manejar todo lo que venga de la intermedia
-	if((*pa)->hijoIzquierdo == NULL && (*pa)->hijoDerecho == NULL && strncmp((*pa)->descripcion, "%s", 2) != 0)
-		fprintf(f, "FLD %s\n", (*pa)->descripcion); 
+	if((*pa)->hijoIzquierdo == NULL && (*pa)->hijoDerecho == NULL && strncmp((*pa)->descripcion, "%s", 2) != 0){
+        
+        apilar(pila_exp, (*pa)->descripcion);
+        //fprintf(f, "FLD %s\n", (*pa)->descripcion); 
+    }
+		
 
     if(strcmp((*pa)->descripcion, "escribir") == 0){
         fprintf(f, "mov dx, OFFSET %s\n",((*pa)->hijoDerecho)->descripcion + 2);
@@ -139,30 +146,48 @@ void traduccionAssembler(t_arbol* pa, FILE* f) {
 
     }
 
-    if (strcmp((*pa)->descripcion, "+") == 0 || strcmp((*pa)->descripcion, "-") == 0 || 
-        strcmp((*pa)->descripcion, "*") == 0 || strcmp((*pa)->descripcion, "/") == 0 || 
-        strcmp((*pa)->descripcion, ":=") == 0) {
-			
-		if (strcmp((*pa)->descripcion, "+") == 0)
-			fprintf(f, "FADD\n"); 
-		if (strcmp((*pa)->descripcion, "-") == 0)
-			fprintf(f, "FSUB\n"); 
-		if (strcmp((*pa)->descripcion, "*") == 0)
-			fprintf(f, "FMUL\n"); 
-		if (strcmp((*pa)->descripcion, "/") == 0)
-			fprintf(f, "FDIV\n"); 
-		
-		if (strcmp((*pa)->descripcion, ":=") == 0){
-            if (strncmp(((*pa)->hijoDerecho)->descripcion, "%s", 2) == 0){
-                fprintf(f, "lea eax, %s\n", ((*pa)->hijoDerecho)->descripcion + 2);
-                fprintf(f, "mov %s, eax\n", ((*pa)->hijoIzquierdo)->descripcion);
-            }else{
-                fprintf(f, "FSTP %s\n", (*pa)->hijoIzquierdo->descripcion); 
+     if (strcmp((*pa)->descripcion, "+") == 0) {
+        realizarOperacion(f, pila_exp, "FADD");
+    } else if (strcmp((*pa)->descripcion, "-") == 0) {
+        realizarOperacion(f, pila_exp, "FSUB");
+    } else if (strcmp((*pa)->descripcion, "*") == 0) {
+        realizarOperacion(f, pila_exp, "FMUL");
+    } else if (strcmp((*pa)->descripcion, "/") == 0) {
+        realizarOperacion(f, pila_exp, "FDIV");
+    } else if (strcmp((*pa)->descripcion, ":=") == 0) {
+        if (strncmp(((*pa)->hijoDerecho)->descripcion, "%s", 2) == 0) {
+            fprintf(f, "lea eax, %s\n", ((*pa)->hijoDerecho)->descripcion + 2);
+            fprintf(f, "mov %s, eax\n", ((*pa)->hijoIzquierdo)->descripcion);
+        } else {
+            char* opIgual = desapilar(pila_exp);
+            if (strcmp(opIgual, "TRUE") == 0) {
+                opIgual = desapilar(pila_exp);
+            } else {
+                cargarOperando(f, opIgual);
             }
+            fprintf(f, "FSTP %s\n", ((*pa)->hijoIzquierdo)->descripcion);
         }
+        liberarPila(pila_exp);
+    }
         //operaciones sobre los dos primeros registros de la pila  y asignacion sobre el tope de pila
         //en todas las operaciones queda el resultado en tope de pila
         //en el caso de la asignacion queda la pila vacia
         //(pensando que previamente lo estaba)
+    
+}
+void cargarOperando(FILE* f, char* operando) {
+    if (strcmp(operando, "TRUE") != 0) {
+        fprintf(f, "FLD %s\n", operando);
     }
+}
+
+void realizarOperacion(FILE* f, t_pila* pila_exp, const char* operacion) {
+    char* opDer = desapilar(pila_exp);
+    char* opIzq = desapilar(pila_exp);
+
+    cargarOperando(f, opIzq);
+    cargarOperando(f, opDer);
+
+    fprintf(f, "%s\n", operacion);
+    apilar(pila_exp, "TRUE");
 }

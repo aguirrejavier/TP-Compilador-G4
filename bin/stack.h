@@ -15,6 +15,7 @@ typedef struct {
 t_pila* crearPila();
 void apilar(t_pila* pila,  ta_nodo* dato);
 ta_nodo* desapilar(t_pila* pila);
+ta_nodo* verTope(t_pila* pila);
 int pilaVacia(t_pila* pila);
 void liberarPila(t_pila* pila);
 

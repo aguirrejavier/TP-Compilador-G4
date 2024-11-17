@@ -35,6 +35,16 @@ ta_nodo* desapilar(t_pila* pila) {
     return dato;
 }
 
+ta_nodo* verTope(t_pila* pila){
+    if (pilaVacia(pila)) {
+        fprintf(stderr, "Error: Intento de desapilar una pila vacía.\n");
+        exit(EXIT_FAILURE);
+    }
+    t_nodoStack* nodoAEliminar = pila->cima;
+    ta_nodo* dato = nodoAEliminar->dato;
+    return dato;
+}
+
 int pilaVacia(t_pila* pila) {
     return pila->cima == NULL;
 }

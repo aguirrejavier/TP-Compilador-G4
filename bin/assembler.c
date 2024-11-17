@@ -159,7 +159,7 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
 	}
 	
 	if(strcmp((*pa)->descripcion, "if") == 0){
-		fprintf(f, "#E%d", (desapilar(pila_exp)));
+		fprintf(f, "#E%d\n", (desapilar(pila_exp)));
 	}
 
 	if((*pa)->hijoIzquierdo == NULL && (*pa)->hijoDerecho == NULL && strncmp((*pa)->descripcion, "%s", 2) != 0){
@@ -189,7 +189,6 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
 		fprintf(f, "FSTSW AX\n");
 		fprintf(f, "SAHF\n");
 		
-		//funcion
 		invertirCondicion((*pa));
 		
 		if(strcmp((*pa)->descripcion, "<=") == 0){
@@ -197,6 +196,19 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
 		}
 		if(strcmp((*pa)->descripcion, ">=") == 0){
 				fprintf(f, "JB #E%d\n",verTope(pila_exp));
+		}
+		
+		if(strcmp((*pa)->descripcion, ">") == 0){
+				fprintf(f, "JNA #E%d\n",verTope(pila_exp));
+		}
+		if(strcmp((*pa)->descripcion, "<") == 0){
+				fprintf(f, "JNB #E%d\n",verTope(pila_exp));
+		}
+		if(strcmp((*pa)->descripcion, "==") == 0){
+				fprintf(f, "JNE #E%d\n",verTope(pila_exp));
+		}
+		if(strcmp((*pa)->descripcion, "<>") == 0){
+				fprintf(f, "JE #E%d\n",verTope(pila_exp));
 		}
 
     }

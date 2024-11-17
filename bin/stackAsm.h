@@ -10,11 +10,11 @@ typedef struct {
     t_nodoStack* cima;
 } t_pila;
 
-t_pila* crearPila();
-void apilar(t_pila* pila, const char* dato);
-char* desapilar(t_pila* pila);
-int pilaVacia(t_pila* pila);
-void liberarPila(t_pila* pila);
-char* verTope(t_pila* pila) ;
+t_pila* crearPilaAsm();
+void apilarAsm(t_pila* pila, const char* dato);
+char* desapilarAsm(t_pila* pila);
+int pilaVaciaAsm(t_pila* pila);
+void liberarPilaAsm(t_pila* pila);
+char* verTopeAsm(t_pila* pila);
 
 #endif // STACK_H

@@ -240,7 +240,7 @@ comparacion:
 
 if:
     sin_sino {ptr_if = ptr_sinsino; printf("sentencia if\n");}
-	|sin_sino SINO LLAA cuerpo_ciclo LLAC { ptr_true->hijoDerecho = ptr_cuerciclo; ptr_if = ptr_sinsino;}
+	|sin_sino SINO LLAA cuerpo_ciclo LLAC { ptr_true->hijoDerecho = crearNodo("else",NULL,ptr_cuerciclo); ptr_if = ptr_sinsino;}
 	;
 
 sin_sino:

@@ -41,7 +41,7 @@ void generarCodigoAssembler(t_arbol *pa, FILE *f_asm, Lista ts){
 	FILE *f_temp = fopen("Temp.asm", "wt");
 	pila_exp = crearPilaAsm();
 	pila_else = crearPilaAsm();
-    recorrerArbol(pa, f_temp); //POST ORDEN
+    recorrerArbol(pa, f_temp,&ts); //POST ORDEN
 	fclose(f_temp);
 	f_temp = fopen("Temp.asm", "rt");
 
@@ -99,7 +99,7 @@ int esHoja(t_arbol* pa){
     return (!(*pa)->hijoIzquierdo) && (!(*pa)->hijoDerecho);
 }
 
-t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
+t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp, Lista *tsimbol){
     if (!*pa) return NULL;
 	
 	//BAJANDO
@@ -117,6 +117,8 @@ t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
 	}
 	if(strcmp((*pa)->descripcion, "BYNARY_COUNT") == 0){
         fprintf(f_temp, "; Empieza la funcion especial BYNARY_COUNT : \n");
+        agregarLexema("es_binario",LEXEMA_STR, "", tsimbol);
+        agregarLexema("@contadorBinario",LEXEMA_ID, "", tsimbol);
 	}
     if(strcmp((*pa)->descripcion, "SUMULT") == 0){
         fprintf(f_temp, "; Empieza la funcion especial SUMAULT : \n");
@@ -155,19 +157,19 @@ t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
         dato = desapilarAsm(pila_exp);
 		fprintf(f_temp, "#E%s\n", dato);
 	}
-    recorrerArbol(&(*pa)->hijoIzquierdo, f_temp);
-    recorrerArbol(&(*pa)->hijoDerecho, f_temp);
+    recorrerArbol(&(*pa)->hijoIzquierdo, f_temp, tsimbol);
+    recorrerArbol(&(*pa)->hijoDerecho, f_temp, tsimbol);
 	//SUBIENDO
 	//traduccionAssembler
 	
     if (strcmp((*pa)->descripcion, "sentencia") != 0 ) {
-        traduccionAssembler(pa, f_temp,&etiqueta);
+        traduccionAssembler(pa, f_temp,&etiqueta, tsimbol);
     }
     return pa;
 
     return NULL;
 }
-void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
+void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta,  Lista* tsimbol) {
     if (!*pa) return;
     char cadena[50] = "";
 	
@@ -183,7 +185,7 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
 	}
 
 	if((*pa)->hijoIzquierdo == NULL && (*pa)->hijoDerecho == NULL && strncmp((*pa)->descripcion, "%s", 2) != 0){
-        fprintf(f, "FLD %s\n", (*pa)->descripcion); 
+        fprintf(f, "FLD %s\n", (*pa)->descripcion);
     }
 		
     if(strcmp((*pa)->descripcion, "escribir") == 0){

@@ -103,37 +103,43 @@ t_arbol* recorrerArbol(t_arbol *pa, FILE *f_temp){
     if (!*pa) return NULL;
 	
 	//BAJANDO
-	
+	char etiqueta_string[10];
 	if(strcmp((*pa)->descripcion, "while") == 0){
-		fprintf(f_temp, "#E%d\n", etiqueta);		
-		apilar(pila_exp, etiqueta);
+		fprintf(f_temp, "#E%d\n", etiqueta);
+        sprintf(etiqueta_string, "%d", etiqueta);
+        printf("TOME = %s\n",etiqueta_string)	;	
+		apilar(pila_exp, etiqueta_string);
 		(etiqueta)++;
-		apilar(pila_exp, etiqueta);
+        sprintf(etiqueta_string, "%d", etiqueta);	
+		apilar(pila_exp, etiqueta_string);
 		(etiqueta)++;
 	}
 	
 	if(strcmp((*pa)->descripcion, "if") == 0){
-		apilar(pila_exp, etiqueta);
+        sprintf(etiqueta_string, "%d", etiqueta);	
+		apilar(pila_exp, etiqueta_string);
 		(etiqueta)++;
 			if((*pa)->hijoDerecho->hijoDerecho != NULL && strcmp((((*pa)->hijoDerecho)->hijoDerecho) -> descripcion, "else") == 0){
-			apilar(pila_exp, etiqueta);
+			sprintf(etiqueta_string, "%d", etiqueta);	
+            apilar(pila_exp, etiqueta_string);
 			(etiqueta)++;
-			apilar(pila_else, 1);
+			apilar(pila_else, "1");
 		}
 		else{
-			apilar(pila_else,0);			
+			apilar(pila_else,"0");			
 		}
 	}
 	
 	if(strcmp((*pa)->descripcion, "OR") == 0){
-		apilar(pila_exp, etiqueta);
+        sprintf(etiqueta_string, "%d", etiqueta);	
+		apilar(pila_exp, etiqueta_string);
 		(etiqueta)++;	
 		auxOR = 1;
 	}
 	
 	if(strcmp((*pa)->descripcion, "else") == 0){
-		fprintf(f_temp, "JMP #E%d\n",verTope(pila_exp)-1);
-		fprintf(f_temp, "#E%d\n", (desapilar(pila_exp)));
+		fprintf(f_temp, "JMP #E%d\n",atoi(verTope(pila_exp))-1);
+		fprintf(f_temp, "#E%s\n", (desapilar(pila_exp)));
 	}
     recorrerArbol(&(*pa)->hijoIzquierdo, f_temp);
     recorrerArbol(&(*pa)->hijoDerecho, f_temp);
@@ -152,14 +158,14 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
     char cadena[50] = "";
 	
 	if(strcmp((*pa)->descripcion, "while") == 0){
-		fprintf(f, "JMP #E%d\n", verTope(pila_exp)-1);
-		fprintf(f, "#E%d\n", verTope(pila_exp));				
+		fprintf(f, "JMP #E%d\n", atoi(verTope(pila_exp))-1);
+		fprintf(f, "#E%d\n", atoi(verTope(pila_exp)));				
 		desapilar(pila_exp);
 		desapilar(pila_exp);
 	}
 	
 	if(strcmp((*pa)->descripcion, "if") == 0){
-		fprintf(f, "#E%d\n", (desapilar(pila_exp)));
+		fprintf(f, "#E%s\n", (desapilar(pila_exp)));
 	}
 
 	if((*pa)->hijoIzquierdo == NULL && (*pa)->hijoDerecho == NULL && strncmp((*pa)->descripcion, "%s", 2) != 0){
@@ -175,8 +181,8 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
 	
 	if(strcmp((*pa)->descripcion, "OR") == 0){
 		desapilar(pila_exp);
-		fprintf(f, "JMP #E%d\n", verTope(pila_exp));
-		fprintf(f, "#E%d\n", verTope(pila_exp)+1); 
+		fprintf(f, "JMP #E%d\n", atoi(verTope(pila_exp)));
+		fprintf(f, "#E%d\n", atoi(verTope(pila_exp))+1); 
 		auxOR = 0;		
 	}
 
@@ -189,26 +195,26 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta) {
 		fprintf(f, "FSTSW AX\n");
 		fprintf(f, "SAHF\n");
 		
-		invertirCondicion((*pa));
+		invertirCondicion(pa);
 		
 		if(strcmp((*pa)->descripcion, "<=") == 0){
-				fprintf(f, "JA #E%d\n",verTope(pila_exp));
+				fprintf(f, "JA #E%s\n",verTope(pila_exp));
 		}
 		if(strcmp((*pa)->descripcion, ">=") == 0){
-				fprintf(f, "JB #E%d\n",verTope(pila_exp));
+				fprintf(f, "JB #E%s\n",verTope(pila_exp));
 		}
 		
 		if(strcmp((*pa)->descripcion, ">") == 0){
-				fprintf(f, "JNA #E%d\n",verTope(pila_exp));
+				fprintf(f, "JNA #E%s\n",verTope(pila_exp));
 		}
 		if(strcmp((*pa)->descripcion, "<") == 0){
-				fprintf(f, "JNB #E%d\n",verTope(pila_exp));
+				fprintf(f, "JNB #E%s\n",verTope(pila_exp));
 		}
 		if(strcmp((*pa)->descripcion, "==") == 0){
-				fprintf(f, "JNE #E%d\n",verTope(pila_exp));
+				fprintf(f, "JNE #E%s\n",verTope(pila_exp));
 		}
 		if(strcmp((*pa)->descripcion, "<>") == 0){
-				fprintf(f, "JE #E%d\n",verTope(pila_exp));
+				fprintf(f, "JE #E%s\n",verTope(pila_exp));
 		}
 
     }

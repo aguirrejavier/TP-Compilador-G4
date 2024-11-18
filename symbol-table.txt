@@ -1,29 +1,36 @@
 NOMBRE                                   || TIPODATO   || VALOR                                              || LONGITUD  
-_a                                       ||            ||                                                    ||           
-_b                                       ||            ||                                                    ||           
-_c                                       ||            ||                                                    ||           
-_x                                       ||            ||                                                    ||           
-_y                                       ||            ||                                                    ||           
-_variable1                               ||            ||                                                    ||           
-_variable2                               ||            ||                                                    ||           
-_i                                       ||            ||                                                    ||           
-_j                                       ||            ||                                                    ||           
-_p1                                      ||            ||                                                    ||           
-_p2                                      ||            ||                                                    ||           
-_p3                                      ||            ||                                                    ||           
-_mensaje                                 ||            ||                                                    ||           
-_condicion                               ||            ||                                                    ||           
+a                                        || Float      ||                                                    ||           
+b                                        || Float      ||                                                    ||           
+c                                        || Float      ||                                                    ||           
+x                                        || Float      ||                                                    ||           
+y                                        || Float      ||                                                    ||           
+variable1                                || Int        ||                                                    ||           
+variable2                                || Int        ||                                                    ||           
+i                                        || Int        ||                                                    ||           
+j                                        || Int        ||                                                    ||           
+p1                                       || String     ||                                                    ||           
+p2                                       || String     ||                                                    ||           
+p3                                       || String     ||                                                    ||           
+mensaje                                  || String     ||                                                    ||           
+condicion                                || Float      ||                                                    ||           
 _5                                       ||            || 5                                                  ||           
 _10                                      ||            || 10                                                 ||           
+_a a b                                   ||            || a a b                                              || 5         
 _42                                      ||            || 42                                                 ||           
 _3                                       ||            || 3                                                  ||           
+_x es mayor que y o a                    ||            || x es mayor que y o a                               || 20        
 _0                                       ||            || 0                                                  ||           
+_b es positivo                           ||            || b es positivo                                      || 13        
 _1                                       ||            || 1                                                  ||           
+_Ciclo terminado. b ahora es:            ||            || Ciclo terminado. b ahora es:                       || 29        
 _Esto es un mensaje de prueba.           ||            || Esto es un mensaje de prueba.                      || 29        
-_123.456                                 ||            || 123.456                                            ||           
-_.789                                    ||            || .789                                               ||           
-_0.123                                   ||            || 0.123                                              ||           
+_123_456                                 ||            || 123.456                                            ||           
+__789                                    ||            || .789                                               ||           
+_0_123                                   ||            || 0.123                                              ||           
 _Inicio                                  ||            || Inicio                                             || 6         
 _Proceso                                 ||            || Proceso                                            || 7         
 _Final                                   ||            || Final                                              || 5         
+_a es mayor que b                        ||            || a es mayor que b                                   || 16        
+_a es menor o igual que b                ||            || a es menor o igual que b                           || 24        
+_c no es menor que b                     ||            || c no es menor que b                                || 19        
 _Nuevo inicio                            ||            || Nuevo inicio                                       || 12        

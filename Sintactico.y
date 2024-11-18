@@ -218,7 +218,7 @@ factor:
     ;
 
 leer: 
-	LEER PARA {auxDatos = 0;} factor PARC {ptr_leer = crearNodo("leer",NULL, ptr_fact); printf("leer");}
+	LEER PARA {auxDatos = 0;} factor PARC {ptr_leer = crearNodo("leer",NULL, ptr_fact); printf("leer\n");}
 	;
 
 escribir:
@@ -308,7 +308,6 @@ sumaLosUltimos:
 	PYC lista_nros PARC { 
 				char *cadena = (char *)malloc(20 * sizeof(char));
 				sprintf(cadena, "%.2f", auxSumaUltimos);
-				printf("SUMA ULT: %s\n", cadena);
 				ptr_sumaLosUltimos = crearNodo(":=",crearHoja($1),crearHoja("@cant"));
 				ptr_sumaLosUltimos_aux2 = crearNodo(":=",crearHoja($1),crearHoja(cadena));
 				ptr_sumaLosUltimos = crearNodo(";",ptr_sumaLosUltimos,ptr_sumaLosUltimos_aux2 );

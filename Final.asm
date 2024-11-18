@@ -1,8 +1,8 @@
 include macros2.asm
 include number.asm
-.MODEL LARGE    ; Modelo de Memoria
-.386            ; Tipo de Procesador
-.STACK 200h     ; Bytes en el Stack
+.MODEL LARGE	; Modelo de Memoria
+.386	        ; Tipo de Procesador
+.STACK 200h		; Bytes en el Stack
 
 .DATA 
 
@@ -29,7 +29,7 @@ _x_es_mayor_que_y_o_a                   db                            "x es mayo
 _0                                      dd                            0.00                          
 _b_es_positivo                          db                            "b es positivo",'$', 13 dup (?)
 _1                                      dd                            1.00                          
-_Ciclo_terminado__b_ahora_es            db                            "Ciclo terminado. b ahora es",'$', 27 dup (?)
+_Ciclo_terminado__b_ahora_es:_          db                            "Ciclo terminado. b ahora es: ",'$', 29 dup (?)
 _Esto_es_un_mensaje_de_prueba_          db                            "Esto es un mensaje de prueba.",'$', 29 dup (?)
 _123_456                                dd                            123.456                       
 __789                                   dd                            .789                          
@@ -41,6 +41,8 @@ _a_es_mayor_que_b                       db                            "a es mayo
 _a_es_menor_o_igual_que_b               db                            "a es menor o igual que b",'$', 24 dup (?)
 _c_no_es_menor_que_b                    db                            "c no es menor que b",'$', 19 dup (?)
 _Nuevo_inicio                           db                            "Nuevo inicio",'$', 12 dup (?)
+_es_binario                             db                            "es_binario",'$', 10 dup (?)
+@contadorBinario                        dd                            ?                             
 
 
 .CODE
@@ -127,7 +129,9 @@ FSUBP
 FSTP b
 JMP E3
 E4:
-displayString _Ciclo_terminado__b_ahora_es
+displayString _Ciclo_terminado__b_ahora_es:_
+FLD b
+displayString b
 FLD mensaje
 FSTP mensaje
 FLD mensaje
@@ -178,10 +182,118 @@ FLD variable2
 FLD variable2
 FLD variable2
 displayString variable2
+; Empieza la funcion especial BYNARY_COUNT : 
+; Empieza la condicion if: 
+FLD 110
+FLD es_binario
+FXCH
+FCOMPP
+FSTSW AX
+SAHF
+JNE E9
+FLD @contadorBinario
+FLD 1
+FSTP @contadorBinario
+JMP E8
+E9:
+FLD @contadorBinario
+FLD 0
+FSTP @contadorBinario
+E8:
+; Empieza la condicion if: 
+FLD 1
+FLD es_binario
+FXCH
+FCOMPP
+FSTSW AX
+SAHF
+JNE E10
+FLD @contadorBinario
+FLD @contadorBinario
+FLD 1
+FADDP
+FSTP @contadorBinario
+E10:
+; Empieza la condicion if: 
+FLD 0
+FLD es_binario
+FXCH
+FCOMPP
+FSTSW AX
+SAHF
+JNE E11
+FLD @contadorBinario
+FLD @contadorBinario
+FLD 1
+FADDP
+FSTP @contadorBinario
+E11:
+; Empieza la condicion if: 
+FLD 5
+FLD es_binario
+FXCH
+FCOMPP
+FSTSW AX
+SAHF
+JNE E12
+FLD @contadorBinario
+FLD @contadorBinario
+FLD 1
+FADDP
+FSTP @contadorBinario
+E12:
+; Empieza la condicion if: 
+FLD x
+FLD es_binario
+FXCH
+FCOMPP
+FSTSW AX
+SAHF
+JNE E13
+FLD @contadorBinario
+FLD @contadorBinario
+FLD 1
+FADDP
+FSTP @contadorBinario
+E13:
+; Empieza la condicion if: 
+FLD 1010
+FLD es_binario
+FXCH
+FCOMPP
+FSTSW AX
+SAHF
+JNE E14
+FLD @contadorBinario
+FLD @contadorBinario
+FLD 1
+FADDP
+FSTP @contadorBinario
+E14:
+; Empieza la condicion if: 
+FLD -1
+FLD es_binario
+FXCH
+FCOMPP
+FSTSW AX
+SAHF
+JNE E15
+FLD @contadorBinario
+FLD @contadorBinario
+FLD 1
+FADDP
+FSTP @contadorBinario
+E15:
+FLD y
+FLD @contadorBinario
+FSTP y
+; Empieza la funcion especial SUMAULT : 
+FLD 74.50
+FSTP x
 
 
 
-mov ax,4c00h    ; Indica que debe finalizar la ejecuci?n
+mov ax,4c00h	; Indica que debe finalizar la ejecuci?n
 int 21h
 
 End START

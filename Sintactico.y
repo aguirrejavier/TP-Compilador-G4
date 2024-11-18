@@ -18,6 +18,7 @@
 #define MAX_ID_COUNT 100
 char *identificadores[MAX_ID_COUNT];
 int contador = 0;
+int error = 0;
 int yystopparser=0;
 FILE  *yyin;
 char *yytext;
@@ -66,10 +67,13 @@ ta_nodo* ptr_while_aux;
 char pivot[50];
 int pivote;
 int cant;
+int auxDatos;
+int auxValidacion;
 float auxSumaUltimos=0;
 int contSumaUltimos;
-
+t_lexema lex;
 t_pila* pila_exp;
+t_pila* pila_conds;
 char* tipoDatoActual = "Int";
 void formatearConstante(char *constante, char *resultado, TipoLexema tipo);
 
@@ -170,7 +174,11 @@ linea:
      identificadores DOS_PUNTOS tipodeDato{
 		int i;
 		for (i = 0; i < contador; i++) {
-            agregarLexema(identificadores[i], LEXEMA_ID, tipoDatoActual,&tablaSimbolos);
+            error = agregarLexema(identificadores[i], LEXEMA_ID, tipoDatoActual,&tablaSimbolos);
+			if (error == -1){
+				printf("ERROR SEMANTICO: DEFINICION DE VARIABLE DUPLICADA\n");
+				return;
+			}
         }
         contador = 0;
 	 }
@@ -202,15 +210,15 @@ termino:
     ;
 
 factor:
-	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n");}
+	 ID {ptr_fact = crearHoja($1);printf("    ID es Factor \n"); strcpy(lex.nombre,$1); auxValidacion = buscarLexemaEnLista(&tablaSimbolos,lex); if(!auxValidacion) {printf("ERROR SEMANTICO: UTILIZACION DE VARIABLE NO DECLARADA\n"); return -1;};if(auxDatos == 0){auxDatos = auxValidacion;}; if(auxDatos != auxValidacion){printf("ERROR SEMANTICO: DISTINTO TIPO EN CONDICIONES.");return -1;}; }
 	| CTE_BIN {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);ptr_fact = crearHoja($1); printf("    CTE_INT es Factor\n");}
-    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_NUM);ptr_fact = crearHoja(resultado); printf("    CTE_INT es Factor\n");}
-	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_NUM);ptr_fact = crearHoja(resultado); printf("    CTE_FLT es Factor\n");}
-	| CTE_STR {agregarLexema(yytext,LEXEMA_STR,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_STR);ptr_fact = crearHoja(resultado); printf("    CTE_STR es Factor\n");}
+    | CTE_INT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_NUM);ptr_fact = crearHoja(resultado); printf("    CTE_INT es Factor\n"); if(auxDatos == 0){auxDatos = 1;}; if(auxDatos == 2){printf("ERROR SEMANTICO: DISTINTO TIPO EN CONDICIONES.");return -1;}}
+	| CTE_FLT {agregarLexema(yytext,LEXEMA_NUM,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_NUM);ptr_fact = crearHoja(resultado); printf("    CTE_FLT es Factor\n"); if(auxDatos == 0){auxDatos = 1;}; if(auxDatos == 2){printf("ERROR SEMANTICO: DISTINTO TIPO EN CONDICIONES.");return -1;}}
+	| CTE_STR {agregarLexema(yytext,LEXEMA_STR,"",&tablaSimbolos);char resultado[100];formatearConstante($1, resultado,LEXEMA_STR);ptr_fact = crearHoja(resultado); printf("    CTE_STR es Factor\n"); if(auxDatos == 0){auxDatos = 2;}; if(auxDatos == 1){printf("ERROR SEMANTICO: DISTINTO TIPO EN CONDICIONES.");return -1;} }
     ;
 
 leer: 
-	LEER PARA factor PARC {ptr_leer = crearNodo("leer",NULL, ptr_fact); printf("leer");}
+	LEER PARA {auxDatos = 0;} factor PARC {ptr_leer = crearNodo("leer",NULL, ptr_fact); printf("leer");}
 	;
 
 escribir:
@@ -219,10 +227,10 @@ escribir:
 	;
 
 condiciones:
-	condicion {ptr_conds = ptr_cond;}
+	condicion {ptr_conds = ptr_cond; apilar(pila_conds, ptr_conds); }
 	|PARA condiciones PARC {}
-	|condicion {apilar(pila_exp, ptr_cond);} OR condicion {ptr_conds = crearNodo("OR",desapilar(pila_exp), ptr_cond);}
-	|condicion {apilar(pila_exp, ptr_cond);} AND condicion {ptr_conds = crearNodo("AND",desapilar(pila_exp), ptr_cond);}
+	|condicion {apilar(pila_exp, ptr_cond);} OR condicion {ptr_conds = crearNodo("OR",desapilar(pila_exp), ptr_cond); apilar(pila_conds, ptr_conds);}
+	|condicion {apilar(pila_exp, ptr_cond);} AND condicion {ptr_conds = crearNodo("AND",desapilar(pila_exp), ptr_cond);apilar(pila_conds, ptr_conds);}
 	;
 
 condicion:
@@ -245,15 +253,15 @@ if:
 	;
 
 sin_sino:
-	SI PARA condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearNodo("condicion",NULL,ptr_conds) , ptr_true = crearNodo("cuerpo",ptr_cuerciclo,NULL));printf("sentencia sin_sino\n"); }
+	SI PARA {auxDatos = 0;} condiciones PARC LLAA cuerpo_ciclo LLAC { ptr_sinsino = crearNodo("if",crearNodo("condicion",NULL,desapilar(pila_conds)) , ptr_true = crearNodo("cuerpo",ptr_cuerciclo,NULL));printf("sentencia sin_sino\n"); }
 	;
 	
 while:
-	MIENTRAS PARA condiciones{ptr_while_aux=ptr_conds;} PARC LLAA cuerpo_ciclo LLAC {ptr_while = crearNodo("while",ptr_while_aux,ptr_cuerciclo);}
+	MIENTRAS PARA {auxDatos = 0;}  condiciones{ptr_while_aux=ptr_conds;} PARC LLAA cuerpo_ciclo LLAC {ptr_while = crearNodo("while",ptr_while_aux,ptr_cuerciclo);}
 	;
 
 asignacion: 
-	ID OP_ASIG condiciones {ptr_asig = crearNodo(":=",crearHoja($1),ptr_conds);}
+	ID  OP_ASIG {auxDatos = 0;}  condiciones {printf("\n\n%d\n\n",auxDatos);strcpy(lex.nombre,$1);auxValidacion = buscarLexemaEnLista(&tablaSimbolos,lex); printf("\n\n%d\n\n",auxValidacion);if(auxValidacion != auxDatos){printf("ERROR SEMANTICO: ASIGNACION CON DISTINTO TIPO DE DATO.");return -1;} if(!buscarLexemaEnLista(&tablaSimbolos,lex)) {printf("ERROR SEMANTICO: UTILIZACION DE VARIABLE NO DECLARADA\n"); return -1;}; ptr_asig = crearNodo(":=",crearHoja($1),ptr_conds);}
 	;
 
 binary_count:
@@ -406,6 +414,7 @@ int main(int argc, char *argv[])
 		return 1;
 		}
 	pila_exp = crearPila();
+	pila_conds = crearPila();
     yyparse();
     
 	fclose(yyin);

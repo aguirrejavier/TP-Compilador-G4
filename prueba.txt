@@ -20,8 +20,7 @@ x := 42 / c
 y := x * 3 + 5
 
 *- Ejemplo de condicion -*
-condicion := (x > y OR a < b)
-if (condicion)
+if (x > y OR a < b)
 {
     write("x es mayor que y o a")
 }
@@ -56,8 +55,7 @@ else
     write("a es menor o igual que b")
 }
 
-condicion := (c < b)
-if (NOT condicion)
+if (NOT c < b)
 {
     write("c no es menor que b")
 }

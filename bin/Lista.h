@@ -45,6 +45,6 @@ void mostrarLista(Lista *lista);
 int sacarLexemaLista(Lista *lista, t_lexema *lex);
 t_lexema copiarLexema(t_lexema original);
 void copiarLista(Lista *origen, Lista *destino);
-void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, Lista *lista);
+int agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, Lista *lista);
 
 #endif // LISTA_H

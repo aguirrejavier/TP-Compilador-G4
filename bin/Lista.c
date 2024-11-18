@@ -34,6 +34,8 @@ int buscarLexemaEnLista(Lista *lista, t_lexema datoBuscado){
     t_nodo *actual = lista->cabeza;
     while (actual) {
         if (strcmp(actual->dato.nombre, datoBuscado.nombre) == 0){
+            if(strcmp(actual->dato.tipoDato,"String") == 0)
+                return 2;
             return 1;
         }
         actual = actual->siguiente;
@@ -138,7 +140,7 @@ void copiarLista(Lista *origen, Lista *destino) {
         nodoActual = nodoActual->siguiente;
     }
 }
-void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, Lista *tablaSimbolos) {
+int agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, Lista *tablaSimbolos) {
     t_lexema lex;
     char nombre[100] = "";
     char valor[100];
@@ -185,5 +187,10 @@ void agregarLexema(const char *simboloNombre, TipoLexema tipo, char *tipoDato, L
         strcpy(lex.longitud, tipo == LEXEMA_STR ? strLongitud : "");
 		strcpy(lex.tipoDato, tipoDato); 
         insertarLexemaEnLista(tablaSimbolos, lex);
+        return 1;
     }
+    else{
+        return -1;
+    }
+
 }

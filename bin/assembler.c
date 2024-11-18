@@ -7,6 +7,7 @@
 #include "stackAsm.h"
 int etiqueta = 0;
 int auxOR = 0;
+int auxNOT = 0;
 t_pila* pila_else;
 t_pila* pila_exp;
 
@@ -202,6 +203,10 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta,  Lista* tsimbol) {
 		auxOR = 0;		
 	}
 
+	if(strcmp((*pa)->descripcion, "NOT") == 0){
+		auxOR = 1;		
+	}
+
     if (strcmp((*pa)->descripcion, ">") == 0 || strcmp((*pa)->descripcion, ">=") == 0 || 
         strcmp((*pa)->descripcion, "<") == 0 || strcmp((*pa)->descripcion, "<=") == 0 || 
         strcmp((*pa)->descripcion, "<>") == 0 || strcmp((*pa)->descripcion, "==") == 0){
@@ -214,6 +219,11 @@ void traduccionAssembler(t_arbol* pa, FILE* f,int* etiqueta,  Lista* tsimbol) {
         if(auxOR==1){
             invertirCondicion(pa);
         }
+
+		if(auxNOT == 1){
+			invertirCondicion(pa);
+			auxNOT = 0;
+		}
 		    
 		
 		if(strcmp((*pa)->descripcion, "<=") == 0){
